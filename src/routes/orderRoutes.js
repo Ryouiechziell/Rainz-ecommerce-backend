@@ -1,0 +1,20 @@
+const express = require('express');
+const router = express.Router();
+const { Order } = require('../models/index.js');
+
+router.post('/add/:userId', async (req, res) => {
+  const order = await Order.create({ ...req.body, userId: req.params.userId });
+  res.status(201).json(order);
+});
+
+router.get('/get/all/:userId', async (req, res) => {
+  const orders = await Order.findAll({ where: { userId: req.params.userId } });
+  res.json(orders);
+});
+
+router.get('/get/:userId', async (req, res) => {
+  const order = await Order.findByPk(req.params.userId);
+  res.json(order);
+});
+
+module.exports = router;
