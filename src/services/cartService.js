@@ -9,7 +9,7 @@ const {
   updateCartItem,
   deleteCartItem } = require("../models/cartModel");
 
-async function getUserCartItem(body) {
+async function getCartService(body) {
   const { user_id } = body;
   const [[rows]] = await getCartByUserId(user_id);
   if (!rows) {
@@ -50,7 +50,7 @@ async function updateCartService(body) {
   return isUpdateSuccess(isUpdated);
 }
 
-async function deleteCartServicebody) {
+async function deleteCartService(body) {
   const { user_id, item_id } = body;
   const [isRemoved] = await removeCartItem(user_id, item_id);
   if (!isDeleteSuccess(isRemoved)) {

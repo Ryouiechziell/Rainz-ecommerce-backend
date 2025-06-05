@@ -1,5 +1,5 @@
 const db = require('./db');
-const builderUpdateQuery3 = require('../utils/builderQueryUpdate3');
+const builderUpdateQuery3 = require('../utils/builderUpdateQuery3.js');
 
 async function createOrder(user_id, order_id, total_price, status) {
   return await db.execute(
