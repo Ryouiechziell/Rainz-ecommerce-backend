@@ -1,31 +1,30 @@
 const Joi = require('joi');
+const {
+  cartQuantityUpdateSchema,
+  cartUserIdUpdateSchema,
+  cartItemIdUpdateSchema } = require("./cartUpdateSchema.js")
 
 const getCartSchema = Joi.object({
   user_id: Joi.string()
-    .uuid()
     .required()
     .messages({
-      'any.required': 'User ID wajib diisi',
-      'string.uuid': 'User ID harus berupa UUID yang valid'
+      'any.required': 'User ID wajib diisi'
     })
-});
+})
+
 
 const addCartSchema = Joi.object({
   user_id: Joi.string()
-    .uuid()
     .required()
     .messages({
-      'any.required': 'User ID wajib diisi',
-      'string.uuid': 'User ID harus berupa UUID yang valid'
+      'any.required': 'User ID wajib diisi'
     }),
   item_id: Joi.string()
-    .uuid()
     .required()
     .messages({
-      'any.required': 'Item ID wajib diisi',
-      'string.uuid': 'Item ID harus berupa UUID yang valid'
+      'any.required': 'Item ID wajib diisi'
     }),
-  quantity: Joi.number()
+  item_quantity: Joi.number()
     .integer()
     .min(1)
     .required()
@@ -37,51 +36,44 @@ const addCartSchema = Joi.object({
     })
 });
 
-const updateCartSchema = (options) => {
-  Joi.object({
-  user_id: userIdUpdateSchema,
-  item_id: itemIdUpdateSchema,
-  quantity: options?.quantity ?
-    cartQuantityUpdateSchema.required() : cartQuantityUpdateSchema.optional(),
-  }).or('quantity')
-}
+const updateCartItemQuantitySchema = Joi.object({
+  user_id: cartUserIdUpdateSchema,
+  item_id: cartItemIdUpdateSchema,
+  item_quantity: cartQuantityUpdateSchema.required()})
 
 const deleteCartSchema = Joi.object({
   user_id: Joi.string()
-    .uuid()
     .required()
     .messages({
       'any.required': 'User ID wajib diisi untuk penghapusan',
-      'string.uuid': 'User ID harus berupa UUID yang valid'
     }),
   item_id: Joi.string()
-    .uuid()
     .required()
     .messages({
-      'any.required': 'Item ID wajib diisi untuk penghapusan',
-      'string.uuid': 'Item ID harus berupa UUID yang valid'
+      'any.required': 'Item ID wajib diisi untuk penghapusan'
     })
 });
 
 function validateGetCart(body){
-  getCartSchema.validate(body, abotEarly: false)
+   console.log(body)
+  return getCartSchema.validate(body, {abortEarly: false})
 }
 
 function validateAddCart(body){
-  addCartSchema.validate(body, abortEarly: false)
+  return addCartSchema.validate(body, {abortEarly: false})
 }
 
-function validateUpdateCart(body){
-  updateCartSchema.validate(body, abortEarly: false)
+function validateUpdateCartItemQuantity(body){
+  return updateCartItemQuantitySchema.validate(body, { abortEarly: false })
 }
 
 function validateDeleteCart(body){
-  deleteCartSchema.validate(body, abortEarly: false)
+  return deleteCartSchema.validate(body, { abortEarly: false})
 }
 
 module.exports = {
   validateGetCart,
   validateAddCart,
-  validateUpdateCart,
+  validateUpdateCartItemQuantity,
   validateDeleteCart
 };

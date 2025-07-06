@@ -1,76 +1,190 @@
-const logger = require("../utils/logger.js")
-const { getAllOrder, getAllUser,getAllPayment, getAllProduct } = require("../models/adminModel.js")
+const logger = require("../utils/logger");
+const { performance } = require("perf_hooks");
+const { checkDbLatency, checkRuntimeLatency } = require("../utils/checkLatency");
+const {
+  isInsertSuccess,
+  isUpdateSuccess,
+  isDeleteSuccess
+} = require("../utils/isQuerySuccess");
+const {
+  getAllStats,
+  getOrderStats,
+  getProductStats,
+  getUserStats
+} = require("../models/adminModel.js");
+const {
+  InternalServerError,
+  NotFoundError
+} = require("../utils/customErrors");
 
-const getStatsService = () => {
-  try{
-    const [[totalUsers]] = await getAllUser()
-    if(!totalUser){
-      logger.error(`[users] GET FAILED Error: Failed to get all users`)
-      return throw new Error("Gagal mengambil stats total user")
+async function getAllStatsService() {
+  const processStart = performance.now();
+  const hinter = "[GET ALL STATS]";
+
+  try {
+    let rows, rows1, rows3;
+
+    try {
+      const dbStart = performance.now();
+
+      const [
+        statsAllResult,
+        statsProductResult,
+        statsOrderResult
+      ] = await Promise.allSettled([
+        getAllStats(),
+        getProductStats(),
+        getOrderStats()
+      ]);
+
+      if (statsAllResult.status === "fulfilled") {
+        rows = statsAllResult.value[0];
+      } else {
+        logger.warn(`${hinter} GAGAL AMBIL DATA USER: ${statsAllResult.reason}`);
+      }
+
+      if (statsProductResult.status === "fulfilled") {
+        rows1 = statsProductResult.value[0];
+      } else {
+        logger.warn(`${hinter} GAGAL AMBIL DATA PRODUCT: ${statsProductResult.reason}`);
+      }
+
+      if (statsOrderResult.status === "fulfilled") {
+        rows3 = statsOrderResult.value[0];
+      } else {
+        logger.warn(`${hinter} GAGAL AMBIL DATA ORDER: ${statsOrderResult.reason}`);
+      }
+
+      checkDbLatency(dbStart, 500, hinter);
+    } catch (dbError) {
+      logger.error(`${hinter} DB ERROR ${dbError.stack}`);
+      throw new InternalServerError("Terjadi kesalahan saat mengambil data statistik dari database");
     }
-    const [[totalOrders]] = await getAllOrder()
-    if(!totalOrders){
-      logger.error(`[orders] GET FAILED Error: Failed to get all orders`)
-      return throw new Error("Gagal mengambil stats total order")
-    }
-    const [[totalProduct]] = await getAllProduct()
-    if(!totalProducts) {
-      logger.error(`[products] GET FAILED Error: Failed to get all products`)
-      return throw new Error("Gagal mengambil stats total product")
-    }
-    const [[totalPayment]] = await getAllPayment()
-    if(!totalPayment) {
-     logger.error(`[payments] GET FAILED Error: Failed to get all payments`)
-      return throw new Error("Gagal mengambil stats payment")
-    }
-    return ({
-      totalUsers,
-      totalOrders,
-      totalProducts,
-      totalPayments
-    })
-  }catch(error){
-    logger.error(`[users || orders || payments || products] GET FAILED Error: Failed to get stats`)
-    return throw new Error("Gagal mengambil data stats")
+
+    checkRuntimeLatency(processStart, hinter);
+
+    return {
+      user: rows ? {
+        total_user: rows.total_user,
+        total_admin: rows.total_admin,
+      } : null,
+
+      order: rows3 ? {
+        total_order: rows.total_order,
+        total_pending_order: rows3.total_pending_order,
+        total_paid_order: rows3.total_paid_order,
+        total_cancelled_order: rows3.total_cancelled_order,
+        total_failed_order: rows3.total_failed_order,
+      } : null,
+
+      product: rows1 ? {
+        total_product: rows.total_product,
+        total_food_product: rows1.total_food_product,
+        total_drink_product: rows1.total_drink_product,
+        total_clothing_product: rows1.total_clothing_product,
+        total_electronic_product: rows1.total_electronic_product,
+        total_sport_product: rows1.total_sport_product,
+        total_automotive_product: rows1.total_automotive_product,
+        total_accessory_product: rows1.total_accessory_product,
+        total_other_product: rows1.total_other_product,
+      } : null,
+    };
+  } catch (err) {
+    logger.error(`${hinter} RUNTIME ERROR ${err.stack}`);
+    throw new InternalServerError("Terjadi kesalahan saat memproses statistik");
   }
 }
 
-const getAllUserService = () => {
-  const [[totalUser]] = await getAllUser()
-  if(!totalUser){
-    return throw new Error("Gagal mengambil stats user")
+async function getUserStatsService() {
+  const processStart = performance.now();
+  const hinter = "[GET USER STATS]";
+
+  try {
+    let rows;
+
+    try {
+      const dbStart = performance.now();
+      [rows] = await getUserStats();
+      checkDbLatency(dbStart, 400, hinter);
+    } catch (err) {
+      logger.error(`${hinter} DB ERROR ${err.stack}`);
+      throw new InternalServerError("Terjadi kesalahan saat mengambil stats users");
+    }
+
+    if (!rows.length) {
+      logger.warn(`${hinter} STATS USERS TIDAK DITEMUKAN`);
+      throw new NotFoundError("Gagal mengambil stats users");
+    }
+
+    checkRuntimeLatency(processStart, hinter);
+    return rows;
+  } catch (err) {
+    logger.error(`${hinter} RUNTIME ERROR ${err.stack}`);
+    throw new InternalServerError("Terjadi kesalahan saat mengambil stats users");
   }
-  return totalUser
 }
 
-const getAllOrderService = () => {
-  const [[totalOrder]] = await getAllOrder()
-  if(!totalOrder) {
-    return throw new Error("Gagal mengambil stats user")
+async function getOrderStatsService() {
+  const processStart = performance.now();
+  const hinter = "[GET ORDER STATS]";
+
+  try {
+    let rows;
+
+    try {
+      const dbStart = performance.now();
+      [rows] = await getOrderStats();
+      checkDbLatency(dbStart, 400, hinter);
+    } catch (err) {
+      logger.error(`${hinter} DB ERROR ${err.stack}`);
+      throw new InternalServerError("Terjadi kesalahan saat mengambil data stats orders");
+    }
+
+    if (!rows.length) {
+      logger.warn(`${hinter} ORDER STATS NOT FOUND`);
+      throw new NotFoundError("Gagal mengambil data stats orders");
+    }
+
+    checkRuntimeLatency(processStart, hinter);
+    return rows;
+  } catch (err) {
+    logger.error(`${hinter} RUNTIME ERROR ${err.stack}`);
+    throw new InternalServerError("Terjadi kesalahan saat mengambil data stats orders");
   }
-  return totalOrder
 }
 
-const getAllPaymentService = () => {
-  const [[totalPayment]] = await getAllPayment()
-  if(!totalOrder) {
-    return throw new Error("Gagal mengambil stats user")
+async function getProductStatsService() {
+  const processStart = performance.now();
+  const hinter = "[GET PRODUCT STATS]";
+
+  try {
+    let rows;
+
+    try {
+      const dbStart = performance.now();
+      [rows] = await getProductStats();
+      checkDbLatency(dbStart, 400, hinter);
+    } catch (err) {
+      logger.error(`${hinter} DB ERROR ${err.stack}`);
+      throw new InternalServerError("Terjadi kesalahan saat mengambil data stats products");
+    }
+
+    if (!rows.length) {
+      logger.warn(`${hinter} STATS PRODUCTS NOT FOUND`);
+      throw new NotFoundError("Gagal mengambil data stats products");
+    }
+
+    checkRuntimeLatency(processStart, hinter);
+    return rows;
+  } catch (err) {
+    logger.error(`${hinter} RUNTIME ERROR ${err.stack}`);
+    throw new InternalServerError("Terjadi kesalahan saat mengambil data stats product");
   }
-  return totalPayment
 }
-
-const getAllProductService = () => {
-  const [[totalProduct]] = await getAllProduct()
-  if(!totalProduct) {
-    return throw new Error("Gagal mengambil stats user")
-  }
-  return totalProduct
-
 
 module.exports = {
-  getStatsService,
-  getAllOderService
-  getAllUserService,
-  getAllPaymentService,
-  getAllProductService
-}
+  getAllStatsService,
+  getUserStatsService,
+  getOrderStatsService,
+  getProductStatsService
+};

@@ -1,26 +1,51 @@
-const { validateUserLogin,validateUserRegister } = require("../utils/validate/validateAuth/validateAuth.js")
-const { authRegisterService, authLoginService } = require("../services/authService.js")
+const createError = require("../utils/createError")
+const { validateUserLogin,validateUserRegister } = require("../utils/validate/validateAuth/validateAuth")
+const {
+  authRegisterService,
+  authLoginService,
+  authLoginGoogleService,
+  authLoginGoogleCallbackService
+} = require("../services/authService")
 
-async function registerController (req, res) {
+async function registerController (req, res, next) {
   try{
-    const register = authRegisterService(req.body)
-    res.status(201).json({message: "Berhasil mendaftarkan akun", data: register});
-  }catch(error){
-    res.status(500).json({message: error})
+    const register = await authRegisterService(req.body)
+    res.status(201).json({success: true, data: register});
+  }catch({message}){
+    next(createError(500, message))
   }
 }
 
-async function loginController (req, res){
+async function loginController (req, res, next){
   try{
-    const login = authLoginService(req.body)
-    res.status(201).json({ message: 'Berhasil login ke akun', data: login});
-  }catch(error){
-    res.status(500).json({message: error})
+    const login = await authLoginService(req.body)
+    res.status(200).json({ success: true, data: login});
+  }catch({message}){
+    next(createError(500, message))
   }
+}
 
+async function loginGoogleController (req, res, next){
+  try{
+    const url = await authLoginGoogleService()
+    res.redirect(url);
+  }catch({message}){
+    next(createError(500, message))
+  }
+}
+
+async function loginGoogleCallbackController (req, res, next){
+  try{
+    const url = await authLoginGoogleCallbackService(req.query)
+    res.redirect(url)
+  }catch({message}){
+    next(createError(500, message))
+  }
 }
 
 module.exports = {
   registerController,
-  loginController
+  loginController,
+  loginGoogleController,
+  loginGoogleCallbackController
 }

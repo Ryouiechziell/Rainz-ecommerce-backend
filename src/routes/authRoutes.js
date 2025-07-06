@@ -1,12 +1,25 @@
 const express = require('express');
 const router = express.Router();
-const verifyTokenMiddleware = require("../middlewares/verifyTokenMiddleware.js")
-const { loginController, registerController } = "../controllers/authController.js"
-const { validateUserRegisterMiddleware, validateUserLoginMiddleware } = "../middlewares/validate/validateAuthMiddleware.js"
-console.log(validateUserRegisterMiddleware)
+const {
+      loginController,
+      registerController,
+      loginGoogleController,
+      loginGoogleCallbackController
+ } = require("../controllers/authController.js")
 
-router.post('/register', registerController)
-router.post('/login', validateUserLoginMiddleware, verifyTokenMiddleware, loginController);
+const {
+	validateUserRegisterMiddleware,
+  validateUserLoginMiddleware
+} = require("../middlewares/validate/validateAuthMiddleware.js")
 
+const validateGoogleCode = require("../middlewares/validateGoogleCode")
+
+router.post('/register', validateUserRegisterMiddleware, registerController)
+
+router.post('/login', validateUserLoginMiddleware, loginController);
+
+router.get('/login/google', loginGoogleController)
+
+router.get('/login/google/callback', validateGoogleCode, loginGoogleCallbackController)
 
 module.exports = router;

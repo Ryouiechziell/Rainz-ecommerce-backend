@@ -1,5 +1,4 @@
-const db = require('./db');
-const builderUpdateQuery3 = require("../utils/builderUpdateQuery3");
+const db = require('./db.js');
 
 async function findCartItem(user_id, item_id) {
   return await db.execute(
@@ -8,17 +7,17 @@ async function findCartItem(user_id, item_id) {
   );
 }
 
-async function insertCartItem(user_id, item_id, quantity) {
+async function addCartItem(cart_id, user_id, item_id, item_quantity) {
   return await db.execute(
-    'INSERT INTO carts (user_id, item_id, quantity) VALUES (?, ?, ?)',
-    [user_id, item_id, quantity]
+    'INSERT INTO carts (cart_id, user_id, item_id, item_quantity) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE item_quantity = item_quantity + VALUES(item_quantity);',
+    [cart_id, user_id, item_id, item_quantity]
   );
 }
 
-async function updateCartItemQuantity(user_id, item_id, quantity) {
+async function updateCartItemQuantity(user_id, item_id, item_quantity) {
   return await db.execute(
-    'UPDATE carts SET quantity = ? WHERE user_id = ? AND item_id = ?',
-    [quantity, user_id, item_id]
+    'UPDATE carts SET item_quantity = ? WHERE user_id = ? AND item_id = ?',
+    [item_quantity, user_id, item_id]
   );
 }
 
@@ -27,17 +26,6 @@ async function getCartByUserId(user_id) {
     'SELECT * FROM carts WHERE user_id = ?',
     [user_id]
   );
-}
-
-async function updateCartItem(body) {
-  const updateQuery = builderUpdateQuery3(
-    'carts',
-    body,
-    'user_id = ? AND item_id = ?',
-    [body.user_id, body.item_id],
-    ['user_id', 'item_id']
-  );
-  return await db.execute(updateQuery);
 }
 
 async function deleteCartItem(user_id, item_id) {
@@ -49,9 +37,8 @@ async function deleteCartItem(user_id, item_id) {
 
 module.exports = {
   findCartItem,
-  insertCartItem,
-  updateCartItemQuantity,
   getCartByUserId,
-  updateCartItem,
+  addCartItem,
+  updateCartItemQuantity,
   deleteCartItem,
 };

@@ -1,35 +1,32 @@
-const express = require('express');
-const router = express.Router();
+const express = require("express")
+const router = express.Router()
+const verifyTokenMiddleware = require("../middlewares/verifyTokenMiddleware.js")
+const {
+  getPaymentController,
+  addPaymentController,
+  updatePaymentStatusController,
+  updatePaymentAmountController,
+  updatePaymentMethodController,
+  deletePaymentController } = require("../controllers/paymentController.js")
 
-const { registerService, loginService } = require("../services/authSe>
+const {
+  validateGetPaymentMiddleware,
+  validateAddPaymentMiddleware,
+  validateUpdatePaymentStatusMiddleware,
+  validateUpdatePaymentAmountMiddleware,
+  validateUpdatePaymentMethodMiddleware,
+  validateDeletePaymentMiddleware } = require("../middlewares/validate/validatePaymentMiddleware.js")
 
-router.get('/get', async (req, res) => {
-  const { error } = validateUserRegister(req.body)
-  if(error) {
-    const messages = error.details.map(e => e.message)
-    return res.status(403).json(message: messages})
-  }
-  try{
-    const register = registerService(req.body)
-    res.status(201).json({message: "Berhasil mendaftarkan akun", data>
-  }catch(error){
-    res.status(403).json({message: error})
-  }
-});
+router.use(verifyTokenMiddleware)
 
-router.post('/login', async (req, res) => {
-  const { error,value } = validateUserLogin(req.body)
-  if(error) {
-    const messages = error.details.map(e => e.message)
-    return res.status(403).json(message: messages})
-  }
-  try{
-    const login = loginService(req.body)
-    res.status(201).json({ message: 'Berhasil login ke akun', data: l>  }catch(error){
-    res.status(403).json({message: error})
-  }
+router.post("/get", validateGetPaymentMiddleware, getPaymentController)
 
-});
+router.post("/add", validateAddPaymentMiddleware, addPaymentController)
 
+router.patch("/update/payment_status", validateUpdatePaymentStatusMiddleware, updatePaymentStatusController)
+router.patch("/update/payment_amount", validateUpdatePaymentAmountMiddleware, updatePaymentAmountController)
+router.patch("/update/payment_method", validateUpdatePaymentMethodMiddleware, updatePaymentMethodController)
 
-module.exports = router;
+router.post("/delete", validateDeletePaymentMiddleware, deletePaymentController)
+
+module.exports = router

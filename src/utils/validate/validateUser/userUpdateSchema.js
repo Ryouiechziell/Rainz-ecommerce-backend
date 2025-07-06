@@ -1,11 +1,9 @@
 const Joi = require("joi")
 
-const userUserIdUpdateSchema = Joi.string()
-    .uuid()
+const userIdUpdateSchema = Joi.string()
     .required()
     .messages({
-      'any.required': 'User ID wajib diisi',
-      'string.uuid': 'User ID harus berupa UUID yang valid'
+      'any.required': 'User ID wajib diisi'
     })
 
 const userUsernameUpdateSchema = Joi.string()
@@ -34,7 +32,7 @@ const userRoleUpdateSchema  = Joi.string()
       'any.only': 'Role hanya boleh "user" atau "admin"'
     })
 
-const userImageUrlUpdateSchema = Joi.string()
+const userProfilePictureUpdateSchema = Joi.string()
     .uri()
     .allow('')
     .messages({
@@ -42,10 +40,10 @@ const userImageUrlUpdateSchema = Joi.string()
     })
 
 module.exports = {
-  userUserIdUpdateSchema,
+  userIdUpdateSchema,
   userUsernameUpdateSchema,
   userEmailUpdateSchema,
   userPasswordUpdateSchema,
   userRoleUpdateSchema,
-  userImageUrlUpdateSchema
+  userProfilePictureUpdateSchema
 }

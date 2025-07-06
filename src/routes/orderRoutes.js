@@ -1,20 +1,29 @@
-const express = require('express');
-const router = express.Router();
-const { Order } = require('../models/index.js');
+const express = require("express")
+const router = express.Router()
+const verifyTokenMiddleware = require("../middlewares/verifyTokenMiddleware.js")
+const {
+  getOrderController,
+  addOrderController,
+  updateOrderStatusController,
+  updateOrderTotalPriceController,
+  deleteOrderController } = require("../controllers/orderController.js")
 
-router.post('/add/:userId', async (req, res) => {
-  const order = await Order.create({ ...req.body, userId: req.params.userId });
-  res.status(201).json(order);
-});
+const {
+  validateGetOrderMiddleware,
+  validateAddOrderMiddleware,
+  validateUpdateOrderStatusMiddleware,
+  validateUpdateOrderTotalPriceMiddleware,
+  validateDeleteOrderMiddleware } = require("../middlewares/validate/validateOrderMiddleware.js")
 
-router.get('/get/all/:userId', async (req, res) => {
-  const orders = await Order.findAll({ where: { userId: req.params.userId } });
-  res.json(orders);
-});
+router.use(verifyTokenMiddleware)
 
-router.get('/get/:userId', async (req, res) => {
-  const order = await Order.findByPk(req.params.userId);
-  res.json(order);
-});
+router.post("/get", validateGetOrderMiddleware, getOrderController)
 
-module.exports = router;
+router.post("/add", validateAddOrderMiddleware, addOrderController)
+
+router.patch("/update/status", validateUpdateOrderStatusMiddleware, updateOrderStatusController)
+router.patch("/update/total_price", validateUpdateOrderTotalPriceMiddleware, updateOrderTotalPriceController)
+
+router.post("/delete", validateDeleteOrderMiddleware, deleteOrderController)
+
+module.exports = router

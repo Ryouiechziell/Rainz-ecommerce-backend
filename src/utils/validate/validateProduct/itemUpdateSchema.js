@@ -1,11 +1,10 @@
 const Joi = require('joi')
 
 const itemIdUpdateSchema = Joi.string()
-    .uuid()
     .required()
     .messages({
       'any.required': 'Item ID wajib untuk update',
-      'string.uuid': 'Item ID harus berupa UUID yang valid'
+      //'string.uuid': 'Item ID harus berupa UUID yang valid'
     })
 
 const itemTitleUpdateSchema = Joi.string()
@@ -42,7 +41,7 @@ const itemCategoryUpdateSchema =  Joi.string()
       'any.only': 'Kategori tidak valid'
     })
 
-const itemImageUrlUpdateSchema = Joi.string()
+const itemCoverUpdateSchema = Joi.string()
     .uri()
     .allow('')
     .messages({
@@ -56,5 +55,5 @@ module.exports = {
   itemStockUpdateSchema,
   itemDescriptionUpdateSchema,
   itemCategoryUpdateSchema,
-  itemImageUrlUpdateSchema
+  itemCoverUpdateSchema
 }

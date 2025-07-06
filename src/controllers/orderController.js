@@ -1,48 +1,60 @@
 const {
-  getOrderByOrderIdService,
-  addProductService,
-  updateProductService,
-  deleteProductService } = require("../services/productService.js")
+  getOrderService,
+  addOrderService,
+  updateOrderStatusService,
+  updateOrderTotalPriceService,
+  deleteOrderService
+} = require("../services/orderService.js"); // pastikan file ini benar
 
-const getOrderController = async (req,res) => {
-  try{
-  const order = await getOrderByOrderIdService(req.body)
-    res.status(200).json({message: "Berhasil mengambil info order", data: order})
-  }catch(error){
-    res.status(404).json({message: error})
+async function getOrderController(req, res, next) {
+  try {
+    const order = await getOrderService(req.body);
+    res.status(200).json({ success: true, data: order });
+  } catch (error) {
+    next(error);
   }
 }
 
-const addOrderController = async (req,res) => {
-  try{
-  const order = await addOrderService(req.body)
-    res.status(200).json({message: "Berhasil menambah order", data: order})
-  }catch(error){
-    res.status(404).json({message: error})
+async function addOrderController(req, res, next) {
+  try {
+    const status = await addOrderService(req.body);
+    res.status(201).json({ success: true, status });
+  } catch (error) {
+    next(error);
   }
 }
 
-const updateOrderController = async (req, res) => {
-  try{
-  const order = await updateOrderService(req.body)
-    res.status(200).json({message: "Berhasil mengedit info order", data: order})
-  }catch(error){
-    res.status(404).json({message: error})
+async function updateOrderStatusController(req, res, next) {
+  try {
+    const status = await updateOrderStatusService(req.body);
+    res.status(200).json({ success: true, status });
+  } catch (error) {
+    next(error);
   }
 }
 
-const deleteOrderController = async (req, res) => {
-  try{
-  const order = await deleteOrderService(req.body)
-    res.status(204).json({message: "Berhasil menghapus order", data: order})
-  }catch(error){
-    res.status(404).json({message: error})
+async function updateOrderTotalPriceController(req, res, next) {
+  try {
+    const status = await updateOrderTotalPriceService(req.body);
+    res.status(200).json({ success: true, status });
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function deleteOrderController(req, res, next) {
+  try {
+    const status = await deleteOrderService(req.body);
+    res.status(200).json({ success: true, status });
+  } catch (error) {
+    next(error);
   }
 }
 
 module.exports = {
   getOrderController,
-  addOrderController
-  updateOrderController,
+  addOrderController,
+  updateOrderStatusController,
+  updateOrderTotalPriceController,
   deleteOrderController
-}
+};

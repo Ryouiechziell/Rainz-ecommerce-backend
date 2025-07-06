@@ -5,15 +5,11 @@ const {
   userEmailUpdateSchema,
   userPasswordUpdateSchema,
   userRoleUpdateSchema,
-  userImageUrlUpdateSchema } = require("./userUpdateSchema.js")
+  userProfilePictureUpdateSchema } = require("./userUpdateSchema.js")
 
 const getUserSchema = Joi.object({
   user_id: Joi.string()
-    .uuid()
-    .optional()
-    .messages({
-      'string.uuid': 'User ID harus berupa UUID yang valid'
-    }),
+    .optional(),
   email: Joi.string()
     .email()
     .optional()
@@ -34,35 +30,31 @@ const getUserSchema = Joi.object({
     })
 })*/
 
+const updateUsernameSchema = Joi.object({
+  user_id: userIdUpdateSchema,
+  username: userUsernameUpdateSchema.required()})
 
-const updateUserSchema = (options) => {
-  Joi.object({
-  user_id: UserUserIdUpdateSchema,
-  username: options?.username ?
-    userUsernameUpdateSchema.required() : userUsernameUpdateSchema.optional(),
+const updateEmailSchema = Joi.object({
+  user_id: userIdUpdateSchema,
+  email: userEmailUpdateSchema.required()})
 
-  email: options?.email ?
-    userEmailUpdateSchema.required() : userEmailUpdateSchema.optional(),
+const updatePasswordSchema = Joi.object({
+  user_id: userIdUpdateSchema,
+  password: userPasswordUpdateSchema.required()})
 
-  password: options?.password ?
-    userPasswordUpdateSchema.required() : userPasswordUpdateSchema.optional(),
+const updateRoleSchema = Joi.object({
+  user_id: userIdUpdateSchema,
+  role: userRoleUpdateSchema.required()})
 
-  role: options?.role ?
-    userRoleUpdateSchema.required() : userRoleUpdateSchema.optional(),
-
-  user_image_url: options?.user_image_url ?
-    userImageUrlUpdateSchema.required() : userImageUrlUpdateSchema.optional(),
-
-  }).or('username', 'email', 'password', 'role', 'user_image_url');
-}
+const updateProfilePictureSchema = Joi.object({
+  user_id: userIdUpdateSchema,
+  profile_picture: userProfilePictureUpdateSchema.required()})
 
 const deleteUserSchema = Joi.object({
   user_id: Joi.string()
-    .uuid()
     .required()
     .messages({
-      'any.required': 'User ID wajib untuk menghapus user',
-      'string.uuid': 'User ID harus berupa UUID yang valid'
+      'any.required': 'User ID wajib untuk menghapus user'
     })
 });
 
@@ -74,27 +66,36 @@ function validateGetUser(body){
   return getAllUserSchema.validate(body, { abortEarly: false })
 }*/
 
-function validateUpdateUser(body, options = {}){
-  return getUpdateUserSchema(options).validate(body, { abortEarly: false })
+function validateUpdateUserUsername(body){
+  return updateUsernameSchema.validate(body, { abortEarly: false })
 }
 
-/*function validateUpdateAllUser(body, options = {}){
-  return deleteAllUserSchema(options).validate(body, { abortEarly: false })
-}*/
+function validateUpdateUserEmail(data){
+  return updateEmailSchema.validate(data, {abortEarly: false})
+}
+
+function  validateUpdateUserPassword(data){
+  return updatePasswordSchema.validate(data, {abortEarly: false})
+}
+
+function validateUpdateUserRole(data) {
+  return updateRoleSchema.validate(data, {abortEarly: false})
+}
+
+function validateUpdateUserProfilePicture(data){
+  return updateProfilePictureSchema.validate(data, {abortEarly: false})
+}
 
 function validateDeleteUser(body){
   return deleteUserSchema.validate(body, { abortEarly: false })
 }
 
-/*function validateDeleteAllUser(body){
-  return deleteAllUserSchema.validate(body, { abortEarly: false })
-}*/
-
 module.exports = {
   validateGetUser,
-  /*validateGetAllUser,*/
-  validateUpdateUser,
-  /*valodateUpdateAllUser,*/
+  validateUpdateUserUsername,
+  validateUpdateUserEmail,
+  validateUpdateUserPassword,
+  validateUpdateUserRole,
+  validateUpdateUserProfilePicture,
   validateDeleteUser
-  /*validateDeleteAlluser*/
 };

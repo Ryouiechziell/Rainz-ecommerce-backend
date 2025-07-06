@@ -1,19 +1,15 @@
 const Joi = require("joi")
 
-const userIdUpdateSchema =  Joi.string()
-    .uuid()
+const cartUserIdUpdateSchema =  Joi.string()
     .required()
     .messages({
-      'any.required': 'User ID wajib diisi untuk update',
-      'string.uuid': 'User ID harus berupa UUID yang valid'
+      'any.required': 'User ID wajib diisi untuk update'
     })
 
- const itemIdUpdateSchema = Joi.string()
-    .uuid()
+ const cartItemIdUpdateSchema = Joi.string()
     .required()
     .messages({
-      'any.required': 'Item ID wajib diisi untuk update',
-      'string.uuid': 'Item ID harus berupa UUID yang valid'
+      'any.required': 'Item ID wajib diisi untuk update'
     })
 
  const cartQuantityUpdateSchema = Joi.number()
@@ -26,7 +22,7 @@ const userIdUpdateSchema =  Joi.string()
     })
 
 module.exports = {
-  userIdUpdateSchema,
-  itemIdUpdateSchema,
+  cartUserIdUpdateSchema,
+  cartItemIdUpdateSchema,
   cartQuantityUpdateSchema
 }

@@ -23,6 +23,11 @@ const registerSchema = Joi.object({
       'string.max': 'Password maximal 30 karakter',
       'string.empty': 'Password tidak boleh kosong',
       'any.required': 'Password wajib diisi'
+    }),
+ role: Joi.string().required().valid("admin","user")
+    .messages({
+      "any.required": "role wajib diisi",
+      "any.valid": "role tidak valid"
     })
 });
 
@@ -43,15 +48,15 @@ const loginSchema = Joi.object({
 });
 
 
-function validateAuthRegister(data) {
+function validateUserRegister(data) {
   return registerSchema.validate(data, { abortEarly: false });
 }
 
-function validateAuthLogin(data) {
+function validateUserLogin(data) {
   return loginSchema.validate(data, { abortEarly: false });
 }
 
 module.exports = {
-  validateAuthRegister,
-  validateAuthLogin
+  validateUserRegister,
+  validateUserLogin
 };

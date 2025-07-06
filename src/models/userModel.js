@@ -1,10 +1,9 @@
 const db = require('./db');
-const builderUpdateQuery3 = require('../utils/builderUpdateQuery3');
 
-async function createUser(user_id, username, email, password, role) {
+async function createUser(user_id, username, email, password, role, pircture) {
   return await db.execute(
-    'INSERT INTO users (user_id, username, email, password, role) VALUES (?, ?, ?, ?, ?)',
-    [user_id, username, email, password, role]
+    'INSERT INTO users (user_id, username, email, password, role, profile_picture) VALUES (?, ?, ?, ?, ?, ?)',
+    [user_id, username, email, password, role, picture]
   );
 }
 
@@ -17,7 +16,7 @@ async function getUserById(user_id) {
 
 async function getUserByEmail(email) {
   return await db.execute(
-    'SELECT email FROM users WHERE email = ?',
+    'SELECT * FROM users WHERE email = ?',
     [email]
   );
 }
@@ -29,15 +28,24 @@ async function getUserByEmailAndPassword(email, password) {
   );
 }
 
-async function updateUser(body) {
-  const updateQuery = builderUpdateQuery3(
-    'users',
-    body,
-    'user_id = ?',
-    [body.user_id],
-    ['user_id']
-  );
-  return await db.execute(updateQuery);
+async function updateUserUsername(username, user_id) {
+  return await db.execute("UPDATE users SET username = ? WHERE user_id = ?",[username, user_id]);
+}
+
+async function updateUserEmail(email, user_id) {
+  return await db.execute("UPDATE users SET email = ? WHERE user_id = ?",[email, user_id]);
+}
+
+async function updateUserPassword(password, user_id) {
+  return await db.execute("UPDATE users SET password = ? WHERE user_id = ?",[password, user_id]);
+}
+
+async function updateUserRole(role, user_id) {
+  return await db.execute("UPDATE users SET role = ? WHERE user_id = ?",[role, user_id]);
+}
+
+async function updateUserProfilePicture(profile_picture, user_id) {
+  return await db.execute("UPDATE users SET profile_picture = ? WHERE user_id = ?",[profile_picture, user_id]);
 }
 
 async function deleteUser(user_id) {
@@ -52,6 +60,10 @@ module.exports = {
   getUserById,
   getUserByEmail,
   getUserByEmailAndPassword,
-  updateUser,
+  updateUserUsername,
+  updateUserEmail,
+  updateUserPassword,
+  updateUserRole,
+  updateUserProfilePicture,
   deleteUser
 };

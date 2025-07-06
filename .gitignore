@@ -1,0 +1,8 @@
+node_modules
+logs
+appendonlydir
+public
+config
+.env
+dump.rdb
+package.lock.json

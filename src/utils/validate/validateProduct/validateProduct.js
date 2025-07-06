@@ -1,30 +1,30 @@
 const Joi = require('joi');
 const {
+  itemIdUpdateSchema,
   itemTitleUpdateSchema,
   itemPriceUpdateSchema,
   itemStockUpdateSchema,
   itemDescriptionUpdateSchema,
   itemCategoryUpdateSchema,
-  itemImageUrlUpdateSchema } = require("./itemUpdateSchema.js")
+  itemCoverUpdateSchema } = require("./itemUpdateSchema.js")
 
 const getProductSchema = Joi.object({
   item_id: Joi.string()
-    .uuid()
     .required()
     .messages({
-      'string.uuid': 'Item ID harus berupa UUID yang valid'
+      'any.required': 'item_id wajib diisi'
     })
 });
 
-const insertProductSchema = Joi.object({
+const addProductSchema = Joi.object({
   item_title: Joi.string()
     .min(5)
-    .max(150)
+    .max(30)
     .required()
     .messages({
       'any.required': 'Nama produk wajib diisi',
       'string.min': 'Nama produk minimal 5 karakter',
-      'string.max': 'Nama produk maksimal 150 karakter'
+      'string.max': 'Nama produk maksimal 30 karakter'
     }),
   item_price: Joi.number()
     .min(0)
@@ -50,58 +50,111 @@ const insertProductSchema = Joi.object({
       'string.max': 'Deskripsi maksimal 500 karakter'
     }),
   item_category: Joi.string()
-    .valid('makanan', 'minuman', 'elektronik', 'fashion', 'lainya')
-    .default('lainnya')
+    .required()
+    .valid(
+      'drink',
+      'food',
+      'electronic',
+      'beauty',
+      'healty',
+      "cltothing",
+      "accessory",
+      "toy",
+      "sport",
+      "automotive",
+      "other"
+    )
+    .default('other')
     .messages({
-      'any.only': 'Kategori tidak valid. Gunakan: makanan, minuman, elektronik, fashion, atau lainnya'
+      'any.required': 'item_category wajib diisi'
     }),
-  item_image_url: Joi.string()
+  item_cover: Joi.string()
     .uri()
     .allow('')
     .messages({
-      'string.uri': 'URL gambar tidak valid'
+      'string.uri': 'URL cover tidak valid'
     })
 });
 
-const updateProductSchema = (options) => {
-  Joi.object({
-
+const updateProductTitleSchema = Joi.object({
   item_id: itemIdUpdateSchema,
+  item_title: itemTitleUpdateSchema.required()})
 
-  item_title: options?.item_title ?
-    itemTitleUpdateSchema.required() : itemTitleUpdateSchema.optional(),
+const updateProductPriceSchema = Joi.object({
+  item_id: itemIdUpdateSchema,
+  item_price: itemPriceUpdateSchema.required()})
 
-  item_price: options?.item_price ?
-   itemPriceUpdateSchema.required() : itemPriceUpdateSchema.optional(),
+const updateProductStockSchema = Joi.object({
+  item_id: itemIdUpdateSchema,
+  item_stock: itemStockUpdateSchema.required()})
 
-  item_stock: options?.item_stock ?
-    itemStockUpdateSchema.required() : itemStockUpdateSchema.optional(),
+const updateProductDescriptionSchema = Joi.object({
+  item_id: itemIdUpdateSchema,
+  item_description: itemDescriptionUpdateSchema.required()})
 
-  item_description: options?.item_description ?
-    itemDescriptionUpdateSchema.required() : itemDescriptionUpdateSchema.optional(),
+const updateProductCategorySchema = Joi.object({
+  item_id: itemIdUpdateSchema,
+  item_category: itemCategoryUpdateSchema.required()})
 
-  item_category: options?.item_category ?
-    itemCategoryUpdateSchema.required() : itemCategoryUpdateSchema.optional(),
-
-  item_image_url: options?.item_image_url ?
-    itemImageUrlUpdateSchema.required() : itemImageUrlUpdateSchema.optional(),
-
-  }).or('item_name', 'item_price', 'item_stock', 'item_description', 'item_category', 'item_image_url')
-}
+const updateProductCoverSchema = Joi.object({
+  item_id: itemIdUpdateSchema,
+  item_cover: itemCoverUpdateSchema.required()})
 
 const deleteProductSchema = Joi.object({
   item_id: Joi.string()
-    .uuid()
     .required()
     .messages({
-      'any.required': 'Item ID wajib diisi untuk menghapus produk',
-      'string.uuid': 'Item ID harus berupa UUID yang valid'
+      'any.required': 'item_id wajib diisi untuk menghapus produk',
     })
 });
 
+function validateGetProduct(data){
+  return getProductSchema.validate(data, {abortEarly: false})
+}
+
+function validateAddProduct(data){
+  return addProductSchema.validate(data, {abortEarly: false})
+}
+
+function validateUpdateProductTitle(data){
+  return updateProductTitleSchema.validate(data, {abortEarly: false})
+}
+
+function  validateUpdateProductPrice(data){
+  return updateProductPriceSchema.validate(data, {abortEarly: false})
+}
+
+function validateUpdateProductStock(data) {
+  return updateProductStockSchema.validate(data, {abortEarly: false})
+}
+
+function validateUpdateProductDescription(data){
+  return updateProductDescriptionSchema.validate(data, {abortEarly: false})
+}
+
+function validateUpdateProductCategory(data){
+  return updateProductCategorySchema.validate(data, {abortEarly: false})
+}
+
+function validateUpdateProductCover(data){
+  return updateProductCoverSchema.validate(data, {abortEarly: false})
+}
+
+function validateDeleteProduct(data){
+  return deleteProductSchema.validate(data, {abortEarly: false})
+}
+
 module.exports = {
-  getProductSchema,
-  insertProductSchema,
-  updateProductSchema,
-  deleteProductSchema
+  validateGetProduct,
+
+  validateAddProduct,
+
+  validateUpdateProductTitle,
+  validateUpdateProductPrice,
+  validateUpdateProductStock,
+  validateUpdateProductDescription,
+  validateUpdateProductCategory,
+  validateUpdateProductCover,
+
+  validateDeleteProduct
 };

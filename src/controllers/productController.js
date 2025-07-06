@@ -1,48 +1,104 @@
 const {
   getProductByItemIdService,
   addProductService,
-  updateProductService,
-  deleteProductService } = require("../services/productService.js")
+  updateProductTitleService,
+  updateProductPriceService,
+  updateProductStockService,
+  updateProductDescriptionService,
+  updateProductCategoryService,
+  updateProductCoverService,
+  deleteProductService
+} = require("../services/productService.js");
 
-const getProductController = async (req,res) => {
-  try{
-  const product = await getProductByItemIdService(req.body)
-    res.status(200).json({message: "Berhasil mengambil info product", data: product})
-  }catch(error){
-    res.status(404).json({message: error})
+async function getProductController(req, res, next) {
+  try {
+    const product = await getProductByItemIdService(req.body);
+    res.status(200).json({ success: true, data: product });
+  } catch (err) {
+    next(err);
   }
 }
 
-const addProductController = async (req,res) => {
-  try{
-  const product = await addProductService(req.body)
-    res.status(200).json({message: "Berhasil menambah product", data: product})
-  }catch(error){
-    res.status(404).json({message: error})
+async function addProductController(req, res, next) {
+  try {
+    const status = await addProductService(req.body);
+    res.status(201).json({ success: true, status });
+  } catch (err) {
+    next(err);
   }
 }
 
-const updateProductController = async (req, res) => {
-  try{
-  const product = await updateProductService(req.body)
-    res.status(200).json({message: "Berhasil mengedit info product", data: product})
-  }catch(error){
-    res.status(404).json({message: error})
+async function updateProductTitleController(req, res, next) {
+  try {
+    const status = await updateProductTitleService(req.body);
+    res.status(200).json({ success: true, status });
+  } catch (err) {
+    next(err);
   }
 }
 
-const deleteProductController = async (req, res) => {
-  try{
-  const product = await deleteProductService(req.body)
-    res.status(204).json({message: "Berhasil menghapus product", data: product})
-  }catch(error){
-    res.status(404).json({message: error})
+async function updateProductPriceController(req, res, next) {
+  try {
+    const status = await updateProductPriceService(req.body);
+    res.status(200).json({ success: true, status });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function updateProductStockController(req, res, next) {
+  try {
+    const status = await updateProductStockService(req.body);
+    res.status(200).json({ success: true, status });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function updateProductDescriptionController(req, res, next) {
+  try {
+    const status = await updateProductDescriptionService(req.body);
+    res.status(200).json({ success: true, status });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function updateProductCategoryController(req, res, next) {
+  try {
+    const status = await updateProductCategoryService(req.body);
+    res.status(200).json({ success: true, status });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function updateProductCoverController(req, res, next) {
+  try {
+    const status = await updateProductCoverService(req.body);
+    res.status(200).json({ success: true, status });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function deleteProductController(req, res, next) {
+  try {
+    const status = await deleteProductService(req.body);
+    res.status(200).json({ success: true, status });
+  } catch (err) {
+    next(err);
   }
 }
 
 module.exports = {
   getProductController,
-  addProductController
-  updateProductController,
+  addProductController,
+  updateProductTitleController,
+  updateProductPriceController,
+  updateProductStockController,
+  updateProductDescriptionController,
+  updateProductCategoryController,
+  updateProductCoverController,
   deleteProductController
-}
+};

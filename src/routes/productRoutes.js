@@ -1,23 +1,41 @@
-const express = require('express');
-const router = express.Router();
+const express = require("express")
+const router = express.Router()
+const verifyTokenMiddleware = require("../middlewares/verifyTokenMiddleware.js")
 const {
   getProductController,
   addProductController,
-  updateProductController,
-  deleteProductController } = require('../models/index.js');
+  updateProductTitleController,
+  updateProductPriceController,
+  updateProductStockController,
+  updateProductDescriptionController,
+  updateProductCategoryController,
+  updateProductCoverController,
+  deleteProductController } = require("../controllers/productController.js")
 
 const {
   validateGetProductMiddleware,
   validateAddProductMiddleware,
-  validateUpdateProductMiddleware,
-  validateDeleteProductMiddleware } = require("../middleware/validate/validateProduct")
+  validateUpdateProductTitleMiddleware,
+  validateUpdateProductPriceMiddleware,
+  validateUpdateProductStockMiddleware,
+  validateUpdateProductDescriptionMiddleware,
+  validateUpdateProductCategoryMiddleware,
+  validateUpdateProductCoverMiddleware,
+  validateDeleteProductMiddleware } = require("../middlewares/validate/validateProductMiddleware.js")
 
-router.get('/get', validateGetProductMiddleware, getProductController)
+router.use(verifyTokenMiddleware)
 
-router.post('/add', validateAddProductMiddleware, addProductController)
+router.post("/get", validateGetProductMiddleware, getProductController)
 
-router.patch('/update', validateUpdateProductMiddleware, updateProductController)
+router.post("/add", validateAddProductMiddleware, addProductController)
 
-router.delete('/delete', validateDeleteProductMiddleware, deleteProductController)
+router.patch("/update/title", validateUpdateProductTitleMiddleware, updateProductTitleController)
+router.patch("/update/price", validateUpdateProductPriceMiddleware, updateProductPriceController)
+router.patch("/update/stock", validateUpdateProductStockMiddleware, updateProductStockController)
+router.patch("/update/description", validateUpdateProductDescriptionMiddleware, updateProductDescriptionController)
+router.patch("/update/category", validateUpdateProductCategoryMiddleware, updateProductCategoryController)
+router.patch("/update/cover", validateUpdateProductCoverMiddleware, updateProductCoverController)
 
-module.exports = router;
+router.post("/delete", validateDeleteProductMiddleware, deleteProductController)
+
+module.exports = router

@@ -1,48 +1,71 @@
 const {
   getPaymentService,
   addPaymentService,
-  updatePaymentService,
-  deletePaymentService } = require("../services/paymentService.js")
+  updatePaymentStatusService,
+  updatePaymentAmountService,
+  updatePaymentMethodService,
+  deletePaymentService
+} = require("../services/paymentService.js");
 
-const getPaymentController = async (req,res) => {
-  try{
-  const payment = await getPaymentService(req.body)
-    res.status(200).json({message: "Berhasil mengambil info payment", data: payment})
-  }catch(error){
-    res.status(404).json({message: error})
+async function getPaymentController(req, res, next) {
+  try {
+    const payment = await getPaymentService(req.body);
+    res.status(200).json({ success: true, data: payment });
+  } catch (err) {
+    next(err);
   }
 }
 
-const addPaymentController = async (req, res) => {
-  try{
-  const payment = await addPaymentService(req.body)
-    res.status(200).json({message: "Berhasil menambah ke payement", data: payment})
-  }catch(error){
-    res.status(404).json({message: error})
+async function addPaymentController(req, res, next) {
+  try {
+    const status = await addPaymentService(req.body);
+    res.status(201).json({ success: true, status });
+  } catch (err) {
+    next(err);
   }
 }
 
-const updatePaymentController = async (req, res) => {
-  try{
-  const payment = await updatePaymentService(req.body)
-    res.status(200).json({message: "Berhasil mengedit payment", data: payment})
-  }catch(error){
-    res.status(404).json({message: error})
+async function updatePaymentStatusController(req, res, next) {
+  try {
+    const status = await updatePaymentStatusService(req.body);
+    res.status(200).json({ success: true, status });
+  } catch (err) {
+    next(err);
   }
 }
 
-const deletePaymentController = async (req, res) => {
-  try{
-  const payment = await deletePaymentService(req.body)
-    res.status(204).json({message: "Berhasil menghapus payment ", data: payment})
-  }catch(error){
-    res.status(404).json({message: error})
+async function updatePaymentAmountController(req, res, next) {
+  try {
+    const status = await updatePaymentAmountService(req.body);
+    res.status(200).json({ success: true, status });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function updatePaymentMethodController(req, res, next) {
+  try {
+    const status = await updatePaymentMethodService(req.body);
+    res.status(200).json({ success: true, status });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function deletePaymentController(req, res, next) {
+  try {
+    const status = await deletePaymentService(req.body);
+    res.status(200).json({ success: true, status });
+  } catch (err) {
+    next(err);
   }
 }
 
 module.exports = {
   getPaymentController,
   addPaymentController,
-  updatePaymentController,
-  deletePayemntController
-}
+  updatePaymentStatusController,
+  updatePaymentAmountController,
+  updatePaymentMethodController,
+  deletePaymentController
+};

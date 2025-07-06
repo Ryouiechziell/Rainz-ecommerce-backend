@@ -1,14 +1,35 @@
 const express = require("express")
 const router = express.Router()
+const verifyTokenMiddleware = require("../middlewares/verifyTokenMiddleware.js")
 const {
   validateGetUserMiddleware,
-  validateUpdateUserMiddleware,
+  validateUpdateUserUsernameMiddleware,
+  validateUpdateUserEmailMiddleware,
+  validateUpdateUserPasswordMiddleware,
+  validateUpdateUserRoleMiddleware,
+  validateUpdateUserProfilePictureMiddleware,
   validateDeleteUserMiddleware } = require("../middlewares/validate/validateUserMiddleware.js")
 
-const { getUserController, updateUserController, deleteUserController } = require("../controllers/userController.js")
+const {
+  getUserController,
+  updateUserUsernameController,
+  updateUserEmailController,
+  updateUserPasswordController,
+  updateUserRoleController,
+  updateUserProfilePictureController,
+  deleteUserController } = require("../controllers/userController.js")
 
-router.get("/get", validateGetUserMiddleware, getUserController)
-router.post("/update", validateUpdateUserMiddleware, updateUserController)
-router.delete("/delete", validateDeleteUserMiddleware, deleteUserController)
+router.use(verifyTokenMiddleware)
+
+router.post("/get", validateGetUserMiddleware, getUserController)
+
+router.patch("/update/username", validateUpdateUserUsernameMiddleware , updateUserUsernameController)
+router.patch("/update/email", validateUpdateUserEmailMiddleware , updateUserEmailController)
+router.patch("/update/password", validateUpdateUserPasswordMiddleware, updateUserPasswordController)
+router.patch("/update/role", validateUpdateUserRoleMiddleware, updateUserRoleController)
+router.patch("/update/profile_picture", validateUpdateUserProfilePictureMiddleware, updateUserProfilePictureController)
+
+
+router.post("/delete", validateDeleteUserMiddleware, deleteUserController)
 
 module.exports = router

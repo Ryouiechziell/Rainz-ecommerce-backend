@@ -1,35 +1,20 @@
-const createError = require("../../utils/createError.js")
-const { validateGetUser, validateUpdateUser, validateDeleteUser } = require("../../utils/validate/validate/validateUser/validateUser.js")
-
-const validateGetUserMiddleware = async (err,req,res,next) => {
-  const { error } = validateGetUser(req.body)
-  if(error) {
-    const messages = error.details.map(e => e.message)
-    return next(createError(402,messages))
-  }
-  next()
-}
-
-const validateUpdateUserMiddleware = async (err,req,res,next) => {
-  const { error } = validateUpdateUser(req.body)
-  if(error) {
-    const messages = error.details.map(e => e.message)
-    return next(createError(402,messages))
-  }
-  next()
-}
-
-const validateDeleteUserMiddleware = async (err,req,res,next) => {
-  const { error } = validateDeleteUser(req.body)
-  if(error) {
-    const messages = error.details.map(e => e.message)
-    return next(createError(402,messages))
-  }
-  next()
-}
+const createValidationMiddleware = require("../../utils/createValidationMiddleware.js")
+const {
+  validateGetUser,
+  validateUpdateUserUsername,
+  validateUpdateUserEmail,
+  validateUpdateUserPassword,
+  validateUpdateUserRole,
+  validateUpdateUserProfilePicture,
+  validateDeleteUser
+} = require("../../utils/validate/validateUser/validateUser.js")
 
 module.exports = {
-  validateGetUserMiddleware,
-  validateUpdateUserMiddleware,
-  validateDeleteUserMiddleware
+  validateGetUserMiddleware: createValidationMiddleware(validateGetUser),
+  validateUpdateUserUsernameMiddleware: createValidationMiddleware(validateUpdateUserUsername),
+  validateUpdateUserEmailMiddleware: createValidationMiddleware(validateUpdateUserEmail),
+  validateUpdateUserPasswordMiddleware: createValidationMiddleware(validateUpdateUserPassword),
+  validateUpdateUserRoleMiddleware: createValidationMiddleware(validateUpdateUserRole),
+  validateUpdateUserProfilePictureMiddleware: createValidationMiddleware(validateUpdateUserProfilePicture),
+  validateDeleteUserMiddleware: createValidationMiddleware(validateDeleteUser),
 }

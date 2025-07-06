@@ -1,45 +1,42 @@
 const Joi = require('joi');
+const {
+  paymentIdUpdateSchema,
+  paymentStatusUpdateSchema,
+  paymentMethodUpdateSchema,
+  paymentAmountUpdateSchema } = require("./paymentUpdateSchema.js")
 
 const getPaymentSchema = Joi.object({
-  user_id: Joi.string()
-    .uuid()
+  payment_id: Joi.string()
     .required()
     .messages({
-      'any.required': 'User ID wajib diisi',
-      'string.uuid': 'User ID harus berupa UUID yang valid'
+      'any.required': 'Payment ID wajib diisi'
+    }),
+  user_id: Joi.string()
+    .required()
+    .messages({
+      'any.required': 'User ID wajib diisi'
     })
 });
 
-const insertPaymentSchema = Joi.object({
-  payment_id: Joi.string()
-    .uuid()
-    .required()
-    .messages({
-      'any.required': 'Payment ID wajib diisi',
-      'string.uuid': 'Payment ID harus berupa UUID yang valid'
-    }),
+const addPaymentSchema = Joi.object({
   user_id: Joi.string()
-    .uuid()
     .required()
     .messages({
       'any.required': 'User ID wajib diisi',
-      'string.uuid': 'User ID harus berupa UUID yang valid'
     }),
   order_id: Joi.string()
-    .uuid()
     .required()
     .messages({
       'any.required': 'Order ID wajib diisi',
-      'string.uuid': 'Order ID harus berupa UUID yang valid'
     }),
-  method: Joi.string()
+  payment_method: Joi.string()
     .valid('credit_card', 'bank_transfer', 'e-wallet', 'cod')
     .required()
     .messages({
       'any.required': 'Metode pembayaran wajib diisi',
       'any.only': 'Metode pembayaran tidak valid. Gunakan: credit_card, bank_transfer, e-wallet, atau cod'
     }),
-  amount: Joi.number()
+  payment_amount: Joi.number()
     .min(0)
     .required()
     .messages({
@@ -47,7 +44,7 @@ const insertPaymentSchema = Joi.object({
       'number.base': 'Jumlah pembayaran harus berupa angka',
       'number.min': 'Jumlah pembayaran tidak boleh negatif'
     }),
-  status: Joi.string()
+  payment_status: Joi.string()
     .valid('pending', 'paid', 'failed')
     .default('pending')
     .messages({
@@ -55,41 +52,62 @@ const insertPaymentSchema = Joi.object({
     })
 });
 
-const updatePaymentSchema = (options) => {
-  Joi.object({
+const updatePaymentStatusSchema = Joi.object({
   payment_id: paymentIdUpdateSchema,
+  payment_status: paymentStatusUpdateSchema.required()})
 
-  status: options.status ?
-    paymentStatusUpdateSchema.required() : paymentStatusUpdateSchema.optional(),
+const updatePaymentAmountSchema = Joi.object({
+  payment_id: paymentIdUpdateSchema,
+  payment_amount: paymentAmountUpdateSchema.required()})
 
-  method: options.method ?
-    paymentMethodUpdateSchema.required() : paymentMethodUpdateSchema.optional(),
-
-  amount: options.amount ?
-    paymentAmountUpdateSchema.required() : paymentAmountUpdateSchema.optional(),
-  }).or('payment_id','status', 'method', 'amount')
-}
+const updatePaymentMethodSchema = Joi.object({
+  payment_id: paymentIdUpdateSchema,
+  payment_method: paymentMethodUpdateSchema.required()})
 
 const deletePaymentSchema = Joi.object({
   payment_id: Joi.string()
-    .uuid()
     .required()
     .messages({
-      'any.required': 'Payment ID wajib diisi untuk penghapusan',
-      'string.uuid': 'Payment ID harus berupa UUID yang valid'
+      'any.required': 'Payment ID wajib diisi untuk penghapusan'
     }),
   user_id: Joi.string()
-    .uuid()
     .required()
     .messages({
-      'any.required': 'User ID wajib diisi untuk penghapusan',
-      'string.uuid': 'User ID harus berupa UUID yang valid'
+      'any.required': 'User ID wajib diisi untuk penghapusan'
     })
 });
 
+function validateGetPayment(body){
+  return getPaymentSchema.validate(body, {abotEarly: false})
+}
+
+function validateAddPayment(body){
+  return addPaymentSchema.validate(body, {abortEarly: false})
+}
+
+function validateUpdatePaymentStatus(body){
+  return updatePaymentStatusSchema.validate(body, { abortEarly: false })
+}
+
+function validateUpdatePaymentAmount(data){
+  return updatePaymentAmountSchema.validate(data, {abortEarly: false})
+}
+
+function  validateUpdatePaymentMethod(data){
+  return updatePaymentMethodSchema.validate(data, {abortEarly: false})
+}
+
+function validateDeletePayment(body){
+  return deletePaymentSchema.validate(body, { abortEarly: false})
+}
+
 module.exports = {
-  getPaymentSchema,
-  insertPaymentSchema,
-  updatePaymentSchema,
-  deletePaymentSchema
+  validateGetPayment,
+  validateAddPayment,
+
+  validateUpdatePaymentStatus,
+  validateUpdatePaymentAmount,
+  validateUpdatePaymentMethod,
+
+  validateDeletePayment
 };

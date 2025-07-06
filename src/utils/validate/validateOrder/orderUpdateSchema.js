@@ -1,11 +1,9 @@
 const Joi = require("joi")
 
 const orderIdUpdateSchema = Joi.string()
-    .uuid()
     .required()
     .messages({
-      'any.required': 'Order ID wajib diisi untuk update',
-      'string.uuid': 'Order ID harus berupa UUID yang valid'
+      'any.required': 'Order ID wajib diisi untuk update'
     })
 
 const orderStatusUpdateSchema = Joi.string()

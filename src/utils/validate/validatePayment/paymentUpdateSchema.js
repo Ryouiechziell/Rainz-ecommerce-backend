@@ -1,11 +1,9 @@
 const Joi = require("joi")
 
 const paymentIdUpdateSchema = Joi.string()
-    .uuid()
     .required()
     .messages({
       'any.required': 'Payment ID wajib diisi untuk update',
-      'string.uuid': 'Payment ID harus berupa UUID yang valid'
     })
 
 const paymentStatusUpdateSchema = Joi.string()

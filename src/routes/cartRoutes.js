@@ -1,20 +1,22 @@
 const express = require("express")
 const router = express.Router()
+const verifyTokenMiddleware = require("../middlewares/verifyTokenMiddleware.js")
 const {
   getCartController,
   addCartController,
-  updateCartComtroller,
-  deleteCartController } = require("../controller/cartController.js")
+  updateCartItemQuantityController,
+  deleteCartController } = require("../controllers/cartController.js")
 
 const {
-  validateGetCart,
-  validateAddCart,
-  validateUpdateCart,
-  validateDeleteCart } = require("../middleware/cartMiddleware")
+  validateGetCartMiddleware,
+  validateAddCartMiddleware,
+  validateUpdateCartItemQuantityMiddleware,
+  validateDeleteCartMiddleware } = require("../middlewares/validate/validateCartMiddleware.js")
 
-router.get("/get", validateGetCart, getCartController)
-router.post("/add", validateAddCart, addCartControlelr)
-router.patch("/update", validateUpdateCart, updateCartController)
-router.delete("delete", validateDeleteCart, deleteCartController)
+router.use(verifyTokenMiddleware)
+router.post("/get", validateGetCartMiddleware, getCartController)
+router.post("/add", validateAddCartMiddleware, addCartController)
+router.patch("/update/item_quantity", validateUpdateCartItemQuantityMiddleware, updateCartItemQuantityController)
+router.post("/delete", validateDeleteCartMiddleware, deleteCartController)
 
 module.exports = router
