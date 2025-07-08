@@ -6,7 +6,7 @@ const {
   isInsertSuccess,
   isUpdateSuccess,
   isDeleteSuccess
-} = require("../utils/isQuerySuccess");
+} = require("../utils/checkQuery");
 
 const {
   getCartByUserId,
@@ -18,7 +18,7 @@ const {
 const {
   InternalServerError,
   NotFoundError
-} = require("../utils/customErrors");
+} = require("../utils/customError");
 
 async function getCartService(payload) {
   const processStart = performance.now();
@@ -41,6 +41,7 @@ async function getCartService(payload) {
     }
 
     if (!rows.length) {
+			console.log(rows)
       logger.warn(`${hinter} CART NOT FOUND`);
       throw new NotFoundError("Cart tidak ditemukan");
     }

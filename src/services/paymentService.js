@@ -5,7 +5,7 @@ const {
   isInsertSuccess,
   isUpdateSuccess,
   isDeleteSuccess,
-} = require("../utils/isQuerySuccess");
+} = require("../utils/checkQuery");
 
 const {
   createPayment,
@@ -21,7 +21,7 @@ const {
 const {
   InternalServerError,
   NotFoundError,
-} = require("../utils/customErrors");
+} = require("../utils/customError");
 
 async function addPaymentService(payload) {
   const processStart = performance.now();

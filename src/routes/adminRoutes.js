@@ -1,16 +1,16 @@
 const express = require('express');
 const router = express.Router();
-const verifyAdminMiddleware = require("../middlewares/verifyAdminMiddleware.js")
-const verifyTokenMiddleware = require("../middlewares/verifyTokenMiddleware.js")
+const verifyRole = require("../middlewares/verifyRole.js")
+const verifyUserToken = require("../middlewares/verifyUserToken.js")
 const {
   getAllStatsController,
   getUserStatsController,
   getProductStatsController,
   getOrderStatsController } = require("../controllers/adminController.js")
 
-router.use(verifyTokenMiddleware)
+router.use(verifyUserToken)
 
-router.use(verifyAdminMiddleware)
+router.use(verifyRole)
 
 router.get('/get/stats/all', getAllStatsController);
 

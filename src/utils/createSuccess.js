@@ -1,4 +1,4 @@
-function createSuccess(status, message, data) {
+module.exports = (status, message, data) => {
   const response = {
     success: true,
     status: status || 200,
@@ -11,5 +11,3 @@ function createSuccess(status, message, data) {
 
   return response;
 }
-
-module.exports = createSuccess;

@@ -5,7 +5,7 @@ const createError = require('../utils/createError');
 
 const JWT_KEY = process.env.JWT_KEY;
 
-function verifyToken(req, res, next) {
+module.exports = (req, res, next) => {
   const hinter = "[VERIFY TOKEN MIDDLEWARE]"
   const authHeader = req.headers.authorization;
 
@@ -25,5 +25,3 @@ function verifyToken(req, res, next) {
     return next(createError(400, 'Token tidak valid atau kadaluarsa'));
   }
 }
-
-module.exports = verifyToken;

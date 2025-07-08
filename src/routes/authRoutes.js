@@ -12,7 +12,7 @@ const {
   validateUserLoginMiddleware
 } = require("../middlewares/validate/validateAuthMiddleware.js")
 
-const validateGoogleCode = require("../middlewares/validateGoogleCode")
+const verifyGoogleCode = require("../middlewares/verifyGoogleCode")
 
 router.post('/register', validateUserRegisterMiddleware, registerController)
 
@@ -20,6 +20,6 @@ router.post('/login', validateUserLoginMiddleware, loginController);
 
 router.get('/login/google', loginGoogleController)
 
-router.get('/login/google/callback', validateGoogleCode, loginGoogleCallbackController)
+router.get('/login/google/callback', verifyGoogleCode, loginGoogleCallbackController)
 
 module.exports = router;

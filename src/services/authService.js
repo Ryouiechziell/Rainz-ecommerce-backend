@@ -4,7 +4,7 @@ const logger = require("../utils/logger");
 const { google } = require("googleapis");
 const { performance } = require("perf_hooks");
 const { v4: uuidv4 } = require("uuid");
-const { isInsertSuccess } = require("../utils/isQuerySuccess");
+const { isInsertSuccess } = require("../utils/checkQuery");
 const { checkDbLatency, checkRuntimeLatency } = require("../utils/checkLatency");
 const { begin, rollback, commit } = require("../models/utilsModel");
 const {
@@ -16,8 +16,8 @@ const {
   InternalServerError,
   NotFoundError,
   BadRequestError
-} = require("../utils/customErrors");
-const { generateToken } = require("../utils/jwt.js");
+} = require("../utils/customError");
+const { generateToken } = require("../utils/jwt");
 
 async function authRegisterService(payload) {
   const processStart = performance.now();

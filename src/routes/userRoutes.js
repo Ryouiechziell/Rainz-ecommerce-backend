@@ -1,6 +1,6 @@
 const express = require("express")
 const router = express.Router()
-const verifyTokenMiddleware = require("../middlewares/verifyTokenMiddleware.js")
+const verifyUserToken = require("../middlewares/verifyUserToken.js")
 const {
   validateGetUserMiddleware,
   validateUpdateUserUsernameMiddleware,
@@ -19,14 +19,18 @@ const {
   updateUserProfilePictureController,
   deleteUserController } = require("../controllers/userController.js")
 
-router.use(verifyTokenMiddleware)
+router.use(verifyUserToken)
 
 router.post("/get", validateGetUserMiddleware, getUserController)
 
 router.patch("/update/username", validateUpdateUserUsernameMiddleware , updateUserUsernameController)
+
 router.patch("/update/email", validateUpdateUserEmailMiddleware , updateUserEmailController)
+
 router.patch("/update/password", validateUpdateUserPasswordMiddleware, updateUserPasswordController)
+
 router.patch("/update/role", validateUpdateUserRoleMiddleware, updateUserRoleController)
+
 router.patch("/update/profile_picture", validateUpdateUserProfilePictureMiddleware, updateUserProfilePictureController)
 
 

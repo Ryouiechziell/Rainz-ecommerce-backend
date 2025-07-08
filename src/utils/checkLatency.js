@@ -3,11 +3,8 @@ const { performance } = require("perf_hooks")
 
 function checkDbLatency(dbStart, slow, hinter){
   const dbLatency = (performance.now() - dbStart).toFixed(2)
-  if (dbLatency > slow) {
-      logger.warn(`${hinter} DB QUERY SUCCESS BUT SLOW DURATION: ${dbLatency}ms`);
-  }else {
-      logger.info(`${hinter} DB QUERY SUCCESS DURATION: ${dbLatency}ms`);
-  }
+  if (dbLatency > slow) return logger.warn(`${hinter} DB QUERY SUCCESS BUT SLOW DURATION: ${dbLatency}ms`);
+  logger.info(`${hinter} DB QUERY SUCCESS DURATION: ${dbLatency}ms`);
 }
 
 function checkRuntimeLatency(processStart, hinter) {

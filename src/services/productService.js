@@ -8,7 +8,7 @@ const {
   isUpdateSuccess,
   isInsertSuccess,
   isDeleteSuccess,
-} = require("../utils/isQuerySuccess");
+} = require("../utils/checkQuery");
 
 const {
   getAllProductStock,
@@ -26,7 +26,7 @@ const {
 const {
   InternalServerError,
   NotFoundError,
-} = require("../utils/customErrors");
+} = require("../utils/customError");
 
 async function syncProductStockToRedis(item_id) {
   const processStart = performance.now();
@@ -53,7 +53,7 @@ async function syncProductStockToRedis(item_id) {
 
     for (const data of rows) {
       await redis().set(`stock:${data.item_id}`, data.item_stock);
-      logger.debug(`${hinter} SUCCESS SYNC DATA KEY: ${data.item_id} & VALUE: ${data.item_stock}`);
+      logger.debug(`${hinter} PAYLOAD : ${JSON.stringify(data,null,2)}`);
     }
 
     checkRuntimeLatency(processStart, hinter);

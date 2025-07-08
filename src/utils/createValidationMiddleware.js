@@ -1,7 +1,7 @@
 const  createError  = require("./createError")
 const logger = require("./logger")
 
-const createValidationMiddleware = (validateFunction) => {
+module.exports = (validateFunction) => {
   return async (req, res, next) => {
     console.log(req.body)
     logger.debug(`[VALIDATION MIDDLEWARE] REQUEST BODY: ${req.body}`)
@@ -20,5 +20,3 @@ const createValidationMiddleware = (validateFunction) => {
     }
   }
 }
-
-module.exports = createValidationMiddleware

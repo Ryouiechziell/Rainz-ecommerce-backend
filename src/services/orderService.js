@@ -7,7 +7,7 @@ const {
   isUpdateSuccess,
   isInsertSuccess,
   isDeleteSuccess,
-} = require("../utils/isQuerySuccess");
+} = require("../utils/checkQuery");
 
 const {
   begin,
@@ -32,14 +32,15 @@ const {
 const {
   InternalServerError,
   NotFoundError,
-} = require("../utils/customErrors");
+} = require("../utils/customError");
 
-async function getOrderService({ order_id }) {
+async function getOrderService(payload) {
   const processStart = performance.now();
   const hinter = "[GET ORDER]";
-  logger.debug(`${hinter} ORDER ID: ${order_id}`);
+  logger.debug(`${hinter} PAYLOAD: ${JSON.stringify(payload,null,2)}`)
 
   try {
+		const { order_id } = payload
     let rows;
 
     try {

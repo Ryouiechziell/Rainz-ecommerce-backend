@@ -7,7 +7,7 @@ const {
   isInsertSuccess,
   isUpdateSuccess,
   isDeleteSuccess,
-} = require("../utils/isQuerySuccess");
+} = require("../utils/checkQuery");
 
 const {
   getUserById,
@@ -23,7 +23,7 @@ const {
 const {
   InternalServerError,
   NotFoundError,
-} = require("../utils/customErrors");
+} = require("../utils/customError");
 
 async function getUserByIdService(payload) {
   const processStart = performance.now();
@@ -37,7 +37,7 @@ async function getUserByIdService(payload) {
     try {
       const dbStart = performance.now();
       [user] = await getUserById(user_id);
-      checkDbLatency(dbStart, 400);
+      checkDbLatency(dbStart, 400, hinter);
     } catch (err) {
       logger.error(`${hinter} DB ERROR err: ${err.stack}`);
       throw new InternalServerError("Terjadi kesalahan saat mengambil data user");
@@ -69,7 +69,7 @@ async function getUserByEmailService(payload) {
     try {
       const dbStart = performance.now();
       [user] = await getUserByEmail(email);
-      checkDbLatency(dbStart, 400);
+      checkDbLatency(dbStart, 400, hinter);
     } catch (err) {
       logger.error(`${hinter} DB ERROR ${err.stack}`);
       throw new InternalServerError("Terjadi kesalahan saat mengambil data pengguna");
@@ -101,7 +101,7 @@ async function updateUserUsernameService(payload) {
     try {
       const dbStart = performance.now();
       [isUpdated] = await updateUserUsername(username, user_id);
-      checkDbLatency(dbStart, 400);
+      checkDbLatency(dbStart, 400, hinter);
     } catch (err) {
       logger.error(`${hinter} DB ERROR ${err.stack}`);
       throw new InternalServerError("Terjadi kesalahan saat memperbarui username pengguna");
@@ -133,7 +133,7 @@ async function updateUserEmailService(payload) {
     try {
       const dbStart = performance.now();
       [isUpdated] = await updateUserEmail(email, user_id);
-      checkDbLatency(dbStart, 400);
+      checkDbLatency(dbStart, 400, hinter);
     } catch (err) {
       logger.error(`${hinter} DB ERROR ${err.stack}`);
       throw new InternalServerError("Terjadi kesalahan saat memperbarui email pengguna");
@@ -173,7 +173,7 @@ async function updateUserPasswordService(payload) {
     try {
       const dbStart = performance.now();
       [isUpdated] = await updateUserPassword(hashed, user_id);
-      checkDbLatency(dbStart, 400);
+      checkDbLatency(dbStart, 400, hinter);
     } catch (err) {
       logger.error(`${hinter} DB ERROR ${err.stack}`);
       throw new InternalServerError("Terjadi kesalahan saat memperbarui password pengguna");
@@ -205,7 +205,7 @@ async function updateUserRoleService(payload) {
     try {
       const dbStart = performance.now();
       [isUpdated] = await updateUserRole(role, user_id);
-      checkDbLatency(dbStart, 400);
+      checkDbLatency(dbStart, 400, hinter);
     } catch (err) {
       logger.error(`${hinter} DB ERROR ${err.stack}`);
       throw new InternalServerError("Terjadi kesalahan saat memperbarui role pengguna");
@@ -236,7 +236,7 @@ async function updateUserProfilePictureService(payload) {
     try {
       const dbStart = performance.now();
       [isUpdated] = await updateUserProfilePicture(profile_picture, user_id);
-      checkDbLatency(dbStart, 400);
+      checkDbLatency(dbStart, 400, hinter);
     } catch (err) {
       logger.error(`${hinter} DB ERROR ${err.stack}`);
       throw new InternalServerError("Terjadi kesalahan saat memperbarui foto profil pengguna");
@@ -268,7 +268,7 @@ async function deleteUserService(payload) {
     try {
       const dbStart = performance.now();
       [isDeleted] = await deleteUser(user_id);
-      checkDbLatency(dbStart, 400);
+      checkDbLatency(dbStart, 400, hinter);
     } catch (err) {
       logger.error(`${hinter} DB ERROR ${err.stack}`);
       throw new InternalServerError("Terjadi kesalahan saat menghapus pengguna");

@@ -1,6 +1,6 @@
 const express = require("express")
 const router = express.Router()
-const verifyTokenMiddleware = require("../middlewares/verifyTokenMiddleware.js")
+const verifyUserToken= require("../middlewares/verifyUserToken.js")
 const {
   getPaymentController,
   addPaymentController,
@@ -17,14 +17,16 @@ const {
   validateUpdatePaymentMethodMiddleware,
   validateDeletePaymentMiddleware } = require("../middlewares/validate/validatePaymentMiddleware.js")
 
-router.use(verifyTokenMiddleware)
+router.use(verifyUserToken)
 
 router.post("/get", validateGetPaymentMiddleware, getPaymentController)
 
 router.post("/add", validateAddPaymentMiddleware, addPaymentController)
 
 router.patch("/update/payment_status", validateUpdatePaymentStatusMiddleware, updatePaymentStatusController)
+
 router.patch("/update/payment_amount", validateUpdatePaymentAmountMiddleware, updatePaymentAmountController)
+
 router.patch("/update/payment_method", validateUpdatePaymentMethodMiddleware, updatePaymentMethodController)
 
 router.post("/delete", validateDeletePaymentMiddleware, deletePaymentController)

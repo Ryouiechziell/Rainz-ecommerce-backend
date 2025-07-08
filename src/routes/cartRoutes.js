@@ -1,6 +1,6 @@
 const express = require("express")
 const router = express.Router()
-const verifyTokenMiddleware = require("../middlewares/verifyTokenMiddleware.js")
+const verifyUserToken = require("../middlewares/verifyUserToken.js")
 const {
   getCartController,
   addCartController,
@@ -13,10 +13,14 @@ const {
   validateUpdateCartItemQuantityMiddleware,
   validateDeleteCartMiddleware } = require("../middlewares/validate/validateCartMiddleware.js")
 
-router.use(verifyTokenMiddleware)
+router.use(verifyUserToken)
+
 router.post("/get", validateGetCartMiddleware, getCartController)
+
 router.post("/add", validateAddCartMiddleware, addCartController)
+
 router.patch("/update/item_quantity", validateUpdateCartItemQuantityMiddleware, updateCartItemQuantityController)
+
 router.post("/delete", validateDeleteCartMiddleware, deleteCartController)
 
 module.exports = router

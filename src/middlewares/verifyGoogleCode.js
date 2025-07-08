@@ -1,7 +1,7 @@
 const createError = require("../utils/createError")
 const logger = require("../utils/logger")
 
-function verifyGoogleCode(req, res, next){
+module.exports = (req, res, next) => {
 
   if(!req?.query?.code) {
     logger.warn("[VERIFY GOOGLE CODE QUERY] CODE DOES NOT EXIST")
@@ -11,5 +11,3 @@ function verifyGoogleCode(req, res, next){
   logger.info("[VERIFY GOOGLE CODE QUERY] GOOGLE QUERY CODE EXIST")
   next()
 }
-
-module.exports = verifyGoogleCode
