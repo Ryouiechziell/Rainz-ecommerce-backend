@@ -27,15 +27,15 @@
     "express":"^5.1.0",
     "ioredis":"^5.6.1",
     "jsonwebtoken":"^9.0.2",
-		"mysql2":"^3.14.1",
-		"perf_hooks":"^0.0.1",
-		"uuid":"^11.1.0",
-		"winston":"^3.17.0",
-		"googleapis":"^150.0.1",
-		"google-auth-library":"^10.1.0",
-		"joi":"^17.13.3",
-		"chalk":"^4.1.2"
-	},
+    "mysql2":"^3.14.1",
+    "perf_hooks":"^0.0.1",
+    "uuid":"^11.1.0",
+    "winston":"^3.17.0",
+    "googleapis":"^150.0.1",
+    "google-auth-library":"^10.1.0",
+    "joi":"^17.13.3",
+    "chalk":"^4.1.2"
+  },
   "devDependencies": {
     "concurrently": "^9.2.0",
 		"nodemon": "^3.1.10"
