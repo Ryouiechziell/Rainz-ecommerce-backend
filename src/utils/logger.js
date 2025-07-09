@@ -12,9 +12,10 @@ const colorizeMessage = (level, message) => {
     case "error":
       return chalk.redBright(message);
     case "warn":
-      return chalk.hex("#FFA500")(message);
+      //return chalk.hex("#FFA500")(message);
+			return chalk.yellowBright(message);
     case "info":
-      return chalk.greenBright(message);
+      return chalk.blue(message);
     default:
       return message;
   }

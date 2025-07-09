@@ -32,7 +32,6 @@ async function syncProductStockToRedis(item_id) {
   const processStart = performance.now();
   const hinter = "[SYNC PRODUCT STOCK REDIS]";
 
-  try {
     let rows;
 
     try {
@@ -43,7 +42,7 @@ async function syncProductStockToRedis(item_id) {
       checkDbLatency(dbStart, 400, hinter);
     } catch (err) {
       logger.error(`${hinter} DB ERROR ${err.stack}`);
-      throw new InternalServerError("Terjadi kesalahan saat mengambil data semua produk stock");
+      throw new InternalServerError("Terjadi kesalahan saat mengambil data produk stock");
     }
 
     if (!rows.length) {
@@ -58,10 +57,6 @@ async function syncProductStockToRedis(item_id) {
 
     checkRuntimeLatency(processStart, hinter);
     return rows;
-  } catch (err) {
-    logger.error(`${hinter} RUNTIME ERROR ${err.stack}`);
-    throw new InternalServerError("Terjadi kesalahan saat mengambil data produk");
-  }
 }
 
 async function getProductByItemIdService(payload) {
@@ -69,8 +64,11 @@ async function getProductByItemIdService(payload) {
   const hinter = "[GET PRODUCT]";
   logger.debug(`${hinter} PAYLOAD: ${JSON.stringify(payload,null,2)}`);
 
-  try {
 		const { item_id } = payload
+
+		const cached = await redis().get(`product:${item_id}`)
+    if(cached) { checkRuntimeLatency(performance.now(),hinter); return JSON.parse(cached); }
+
     let rows;
 
     try {
@@ -87,12 +85,9 @@ async function getProductByItemIdService(payload) {
       throw new NotFoundError("Produk tidak ditemukan");
     }
 
+		await redis().set(`product:${item_id}`, JSON.stringify(rows), "EX", 3600)
     checkRuntimeLatency(processStart, hinter);
     return rows;
-  } catch (err) {
-    logger.error(`${hinter} RUNTIME ERROR ${err.stack}`);
-    throw new InternalServerError("Terjadi kesalahan saat mengambil data produk");
-  }
 }
 
 async function addProductService(payload) {
@@ -100,8 +95,6 @@ async function addProductService(payload) {
   const item_id = "ITM-" + uuidv4();
   const hinter = "[ADD PRODUCT]";
   logger.debug(`${hinter} PAYLOAD: ${JSON.stringify(payload,null,2)}`);
-
-  try {
 
 		const {
 		  item_title,
@@ -141,10 +134,6 @@ async function addProductService(payload) {
     await syncProductStockToRedis(item_id);
     checkRuntimeLatency(processStart, hinter);
     return true;
-  } catch (err) {
-    logger.error(`${hinter} RUNTIME ERROR ${err.stack}`);
-    throw new InternalServerError("Terjadi kesalahan saat menambahkan produk");
-  }
 }
 
 async function updateProductTitleService(payload) {
@@ -152,7 +141,6 @@ async function updateProductTitleService(payload) {
   const hinter = "[UPDATE PRODUCT TITLE]";
   logger.debug(`${hinter} PAYLOAD: ${JSON.stringify(payload,null,2)}`);
 
-  try {
 		const { item_id, item_title } = payload
     let isUpdated;
 
@@ -172,10 +160,6 @@ async function updateProductTitleService(payload) {
 
     checkRuntimeLatency(processStart, hinter);
     return true;
-  } catch (err) {
-    logger.error(`${hinter} RUNTIME ERROR ${err.stack}`);
-    throw new InternalServerError("Terjadi kesalahan saat mengupdate judul produk");
-  }
 }
 
 async function updateProductPriceService(payload) {
@@ -183,7 +167,6 @@ async function updateProductPriceService(payload) {
   const hinter = "[UPDATE PRODUCT PRICE]";
   logger.debug(`${hinter} PAYLOAD: ${JSON.stringify(payload,null,2)}`);
 
-  try {
 		const { item_id, item_price } = payload
     let isUpdated;
 
@@ -203,10 +186,6 @@ async function updateProductPriceService(payload) {
 
     checkRuntimeLatency(processStart, hinter);
     return true;
-  } catch (err) {
-    logger.error(`${hinter} RUNTIME ERROR ${err.stack}`);
-    throw new InternalServerError("Terjadi kesalahan saat memperbarui harga produk");
-  }
 }
 
 async function updateProductStockService(payload) {
@@ -214,7 +193,6 @@ async function updateProductStockService(payload) {
   const hinter = "[UPDATE PRODUCT STOCK]";
   logger.debug(`${hinter} PAYLOAD: ${JSON.stringify(payload,null,2)}`);
 
-  try {
 		const { item_id, item_stock } = payload
     let isUpdated;
 
@@ -234,10 +212,6 @@ async function updateProductStockService(payload) {
 
     checkRuntimeLatency(processStart, hinter);
     return true;
-  } catch (err) {
-    logger.error(`${hinter} RUNTIME ERROR ${err.stack}`);
-    throw new InternalServerError("Terjadi kesalahan saat memperbarui stok produk");
-  }
 }
 
 async function updateProductDescriptionService(payload) {
@@ -245,7 +219,6 @@ async function updateProductDescriptionService(payload) {
   const hinter = "[UPDATE PRODUCT DESCRIPTION]";
   logger.debug(`${hinter} PAYLOAD: ${JSON.stringify(payload,null,2)}`);
 
-  try {
   	const { item_id, item_description } = payload
     let isUpdated;
 
@@ -265,10 +238,6 @@ async function updateProductDescriptionService(payload) {
 
     checkRuntimeLatency(processStart, hinter);
     return true;
-  } catch (err) {
-    logger.error(`${hinter} RUNTIME ERROR ${err.stack}`);
-    throw new InternalServerError("Terjadi kesalahan saat memperbarui deskripsi produk");
-  }
 }
 
 async function updateProductCategoryService(payload) {
@@ -276,7 +245,6 @@ async function updateProductCategoryService(payload) {
   const hinter = "[UPDATE PRODUCT CATEGORY]";
   logger.debug(`${hinter} PAYLOAD: ${JSON.stringify(payload,null,2)}`);
 
-  try {
 		const { item_id, item_category } = payload
     let isUpdated;
 
@@ -296,10 +264,6 @@ async function updateProductCategoryService(payload) {
 
     checkRuntimeLatency(processStart, hinter);
     return true;
-  } catch (err) {
-    logger.error(`${hinter} RUNTIME ERROR ${err.stack}`);
-    throw new InternalServerError("Terjadi kesalahan saat memperbarui kategori produk");
-  }
 }
 
 async function updateProductCoverService(payload) {
@@ -307,7 +271,6 @@ async function updateProductCoverService(payload) {
   const hinter = "[UPDATE PRODUCT COVER]";
   logger.debug(`${hinter} PAYLOAD: ${JSON.stringify(payload,null,2)}`);
 
-  try {
 		const { item_id, item_cover } = payload;
     let isUpdated;
 
@@ -327,10 +290,6 @@ async function updateProductCoverService(payload) {
 
     checkRuntimeLatency(processStart, hinter);
     return true;
-  } catch (err) {
-    logger.error(`${hinter} RUNTIME ERROR ${err.stack}`);
-    throw new InternalServerError("Terjadi kesalahan saat memperbarui sampul produk");
-  }
 }
 
 async function deleteProductService(payload) {
@@ -338,7 +297,6 @@ async function deleteProductService(payload) {
   const hinter = "[DELETE PRODUCT]";
   logger.debug(`${hinter} PAYLOAD: ${JSON.stringify(payload,null,2)}`);
 
-  try {
     const { item_id } = payload
     let isDeleted;
 
@@ -358,10 +316,6 @@ async function deleteProductService(payload) {
 
     checkRuntimeLatency(processStart, hinter);
     return true;
-  } catch (err) {
-    logger.error(`${hinter} RUNTIME ERROR ${err.stack}`);
-    throw new InternalServerError("Terjadi kesalahan saat menghapus produk");
-  }
 }
 
 module.exports = {

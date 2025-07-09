@@ -4,7 +4,7 @@
   "description": "Project for Rainz E-commerce Logic bussiness",
   "main": "server.js",
   "scripts": {
-    "dev": "concurrently 'mysqld_safe' 'redis-server config/redis.conf' 'node server.js'",
+    "dev": "concurrently 'mysqld_safe' 'redis-server config/redis.conf' 'nodemon server.js'",
     "start": "node server.js"
   },
   "repository": {

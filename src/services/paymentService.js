@@ -1,4 +1,5 @@
 const logger = require("../utils/logger");
+const redis = require("../boot/redisClient")
 const { performance } = require("perf_hooks");
 const { v4: uuidv4 } = require("uuid");
 const {
@@ -29,7 +30,6 @@ async function addPaymentService(payload) {
   const hinter = "[ADD PAYMENT]";
   logger.debug(`${hinter} PAYLOAD: ${JSON.stringify(payload,null,2)}`)
 
-  try {
 		const { user_id, order_id, payment_method, payment_amount, payment_status } = payload;
     let isInserted;
 
@@ -51,11 +51,6 @@ async function addPaymentService(payload) {
 
     checkRuntimeLatency(processStart, hinter);
     return true;
-
-  } catch (err) {
-    logger.error(`${hinter} RUNTIME ERROR ${err.stack}`);
-    throw new InternalServerError("Terjadi kesalahan saat membuat pembayaran");
-  }
 }
 
 async function getPaymentService(payload) {
@@ -63,14 +58,16 @@ async function getPaymentService(payload) {
   const hinter = "[GET PAYMENT]";
   logger.debug(`${hinter} PAYLOAD: ${JSON.stringify(payload,null,2)}`)
 
-  try {
-    let payment;
 		const { payment_id, user_id } = payload
 
+		const cached = await redis().get(`user:${user_id}&payment:${payment_id}`)
+    if(cached) { checkRuntimeLatency(performance.now(),hinter); return JSON.parse(cached); }
+
+		let rows;
     try {
       const dbStart = performance.now();
 
-      [payment] = await getPaymentByPaymentId(payment_id, user_id);
+      [rows] = await getPaymentByPaymentId(payment_id, user_id);
       checkDbLatency(dbStart, 400, hinter);
 
     } catch (err) {
@@ -78,18 +75,14 @@ async function getPaymentService(payload) {
       throw new InternalServerError("Terjadi kesalahan saat mengambil data pembayaran");
     }
 
-    if (!payment.length) {
+    if (!rows.length) {
       logger.warn(`${hinter} PAYMENT NOT FOUND`);
       throw new NotFoundError("Pembayaran tidak ditemukan");
     }
 
+		await redis().set(`user:${user_id}&payment:${payment_id}`, JSON.stringify(rows), "EX", 3600)
     checkRuntimeLatency(processStart, hinter);
     return payment;
-
-  } catch (err) {
-    logger.error(`${hinter} RUNTIME ERROR ${err.stack}`);
-    throw new InternalServerError("Terjadi kesalahan saat mengambil data pembayaran");
-  }
 }
 
 async function updatePaymentStatusService(payload) {
@@ -97,7 +90,6 @@ async function updatePaymentStatusService(payload) {
   const hinter = "[UPDATE PAYMENT STATUS]";
   logger.debug(`${hinter} PAYLOAD: ${JSON.stringify(payload,null,2)}`);
 
-  try {
     const { payment_id, payment_status } = payload;
     let isUpdated;
 
@@ -119,11 +111,6 @@ async function updatePaymentStatusService(payload) {
 
     checkRuntimeLatency(processStart, hinter);
     return true;
-
-  } catch (err) {
-    logger.error(`${hinter} RUNTIME ERROR ${err.stack}`);
-    throw new InternalServerError("Terjadi kesalahan saat memperbarui status pembayaran");
-  }
 }
 
 async function updatePaymentMethodService(payload) {
@@ -131,7 +118,6 @@ async function updatePaymentMethodService(payload) {
   const hinter = "[UPDATE PAYMENT METHOD]";
   logger.debug(`${hinter} PAYLOAD: ${JSON.stringify(payload,null,2)}`);
 
-  try {
 		const { payment_id, payment_method } = payload
     let isUpdated;
 
@@ -153,11 +139,6 @@ async function updatePaymentMethodService(payload) {
 
     checkRuntimeLatency(processStart, hinter);
     return true;
-
-  } catch (err) {
-    logger.error(`${hinter} RUNTIME ERROR ${err.stack}`);
-    throw new InternalServerError("Terjadi kesalahan saat memperbarui metode pembayaran");
-  }
 }
 
 async function updatePaymentAmountService(payload) {
@@ -165,7 +146,6 @@ async function updatePaymentAmountService(payload) {
   const hinter = "[UPDATE PAYMENT AMOUNT]";
   logger.debug(`${hinter} PAYLOAD: ${JSON.stringify(payload,null,2)}`);
 
-  try {
 		const { payment_id, payment_amount } = payload
     let isUpdated;
 
@@ -187,11 +167,6 @@ async function updatePaymentAmountService(payload) {
 
     checkRuntimeLatency(processStart, hinter);
     return true;
-
-  } catch (err) {
-    logger.error(`${hinter} RUNTIME ERROR ${err.stack}`);
-    throw new InternalServerError("Terjadi kesalahan saat memperbarui jumlah pembayaran");
-  }
 }
 
 async function deletePaymentService(payload) {
@@ -199,7 +174,6 @@ async function deletePaymentService(payload) {
   const hinter = "[DELETE PAYMENT]";
   logger.debug(`${hinter} PAYLOAD: ${JSON.stringify(payload,null,2)}`);
 
-  try {
 		const { payment_id, user_id } = payload
     let isDeleted;
 
@@ -221,11 +195,6 @@ async function deletePaymentService(payload) {
 
     checkRuntimeLatency(processStart, hinter);
     return true;
-
-  } catch (err) {
-    logger.error(`${hinter} RUNTIME ERROR ${err.stack}`);
-    throw new InternalServerError("Terjadi kesalahan saat menghapus pembayaran");
-  }
 }
 
 module.exports = {

@@ -1,4 +1,5 @@
 const logger = require("../utils/logger")
+const redis = require("../boot/redisClient")
 const { performance } = require("perf_hooks")
 const { v4: uuidv4 } = require("uuid");
 const { checkDbLatency, checkRuntimeLatency } = require("../utils/checkLatency")
@@ -25,8 +26,10 @@ async function getCartService(payload) {
   const hinter = "[GET CART]"
   logger.debug(`${hinter} PAYLOAD: ${JSON.stringify(payload,null,2)}`)
 
-  try {
     const { user_id } = payload
+		const cached = await redis().get(`usercart:${user_id}`)
+		if(cached) { checkRuntimeLatency(performance.now(),hinter); return JSON.parse(cached); }
+
     let rows;
 
     try {
@@ -41,18 +44,13 @@ async function getCartService(payload) {
     }
 
     if (!rows.length) {
-			console.log(rows)
       logger.warn(`${hinter} CART NOT FOUND`);
       throw new NotFoundError("Cart tidak ditemukan");
     }
 
+		await redis().set(`usercart:${user_id}`, JSON.stringify(rows), "EX", 3600)
     checkRuntimeLatency(processStart, hinter);
     return rows;
-
-  }catch(err) {
-    logger.error(`${hinter} RUNTIME ERROR ${err.stack}`);
-    throw new InternalServerError("Terjadi kesalahan saat mengambil info cart");
-  }
 }
 
 async function addCartService(payload) {
@@ -61,11 +59,10 @@ async function addCartService(payload) {
   const hinter = "[ADD CART]"
   logger.debug(`${hinter} PAYLOAD: ${JSON.stringify(payload,null,2)}`)
 
-  try {
     const { user_id, item_id, item_quantity } = payload
     let isInserted;
 
-    try {
+		try {
       const dbStart = performance.now();
 
       [isInserted] = await addCartItem(cart_id, user_id, item_id, item_quantity);
@@ -83,11 +80,6 @@ async function addCartService(payload) {
 
     checkRuntimeLatency(processStart, hinter);
     return true;
-
-  }catch(err) {
-    logger.error(`${hinter} RUNTIME ERROR ${err.stack}`);
-    throw new InternalServerError("Terjadi kesalahan saat menambahkan item ke cart");
-  }
 }
 
 async function updateCartItemQuantityService(payload) {
@@ -95,7 +87,6 @@ async function updateCartItemQuantityService(payload) {
     const hinter = "[UPDATE CART ITEM QUANTITY]"
     logger.debug(`${hinter} PAYLOAD: ${JSON.stringify(payload,null,2)}`)
 
-  try{
 		const { user_id, item_id, item_quantity } = payload
     let isUpdated;
 
@@ -117,11 +108,6 @@ async function updateCartItemQuantityService(payload) {
 
     checkRuntimeLatency(processStart, hinter);
     return true;
-
-  }catch(err) {
-    logger.error(`${hinter} RUNTIME ERROR ${err.stack}`);
-    throw new InternalServerError("Terjadi kesalahan saat mengupdate kuantitas item");
-  }
 }
 
 async function deleteCartService(payload) {
@@ -129,7 +115,6 @@ async function deleteCartService(payload) {
   const hinter = "[DELETE CART ITEM]"
   logger.debug(`${hinter} PAYLOAD: ${JSON.stringify(payload,null,2)}`)
 
-  try {
     const { user_id, item_id } = payload
     let isDeleted;
 
@@ -153,11 +138,6 @@ async function deleteCartService(payload) {
 
     checkRuntimeLatency(processStart, hinter);
     return true;
-
-  }catch(err) {
-    logger.error(`${hinter} RUNTIME ERROR ${err.stack}`);
-    throw new InternalServerError("Terjadi kesalahan saat menghapus item dari cart");
-  }
 }
 
 module.exports = {

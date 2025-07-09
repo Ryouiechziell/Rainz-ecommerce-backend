@@ -1,4 +1,5 @@
-const logger = require("../utils/logger.js");
+const logger = require("../utils/logger");
+const redis = require("../boot/redisClient")
 const { performance } = require("perf_hooks");
 const { checkDbLatency, checkRuntimeLatency } = require("../utils/checkLatency");
 const bcrypt = require("bcryptjs");
@@ -18,7 +19,7 @@ const {
   updateUserRole,
   updateUserProfilePicture,
   deleteUser,
-} = require("../models/userModel.js");
+} = require("../models/userModel");
 
 const {
   InternalServerError,
@@ -30,8 +31,11 @@ async function getUserByIdService(payload) {
   const hinter = "[GET USER]";
   logger.debug(`${hinter} PAYLOAD: ${JSON.stringify(payload,null,2)}`);
 
-  try {
 		const { user_id } = payload;
+
+		const cached = await redis().get(`userid:${user_id}`)
+    if(cached) { checkRuntimeLatency(performance.now(),hinter); return JSON.parse(cached); }
+
     let user;
 
     try {
@@ -48,13 +52,9 @@ async function getUserByIdService(payload) {
       throw new NotFoundError("User tidak ditemukan");
     }
 
+		await redis().set(`userid:${user_id}`, JSON.stringify(user), "EX", 3600)
     checkRuntimeLatency(processStart, hinter);
     return user;
-
-  } catch (err) {
-    logger.error(`${hinter} RUNTIME ERROR ${err.stack}`);
-    throw new InternalServerError("Terjadi kesalahan saat mengambil data user");
-  }
 }
 
 async function getUserByEmailService(payload) {
@@ -62,8 +62,11 @@ async function getUserByEmailService(payload) {
   const hinter = "[GET USER BY EMAIL]";
   logger.debug(`${hinter} PAYLOAD: ${JSON.stringify(payload,null,2)}`);
 
-  try {
-		const { email } = payload
+		const { email } = payload;
+
+		const cached = await redis().get(`useremail:${email}`)
+    if(cached) { checkRuntimeLatency(performance.now(),hinter); return JSON.parse(cached); }
+
     let user;
 
     try {
@@ -80,13 +83,9 @@ async function getUserByEmailService(payload) {
       throw new NotFoundError("Pengguna tidak ditemukan");
     }
 
+		await redis().set(`useremail:${email}`, JSON.stringify(user), "EX", 3600)
     checkRuntimeLatency(processStart, hinter);
     return user;
-
-  } catch (err) {
-    logger.error(`${hinter} RUNTIME ERROR ${err.stack}`);
-    throw new InternalServerError("Terjadi kesalahan saat mengambil data user");
-  }
 }
 
 async function updateUserUsernameService(payload) {
@@ -94,7 +93,6 @@ async function updateUserUsernameService(payload) {
   const hinter = "[UPDATE USER USERNAME]";
   logger.debug(`${hinter} PAYLOAD: ${JSON.stringify(payload,null,2)}`);
 
-  try {
 		const { username, user_id } = payload;
     let isUpdated;
 
@@ -114,11 +112,6 @@ async function updateUserUsernameService(payload) {
 
     checkRuntimeLatency(processStart, hinter);
     return true;
-
-  } catch (err) {
-    logger.error(`${hinter} RUNTIME ERROR ${err.stack}`);
-    throw new InternalServerError("Terjadi kesalahan saat memperbarui username");
-  }
 }
 
 async function updateUserEmailService(payload) {
@@ -126,7 +119,6 @@ async function updateUserEmailService(payload) {
   const hinter = "[UPDATE USER EMAIL]";
   logger.debug(`${hinter} PAYLOAD: ${JSON.stringify(payload,null,2)}`);
 
-  try {
 		const { email, user_id } = payload
     let isUpdated;
 
@@ -146,11 +138,6 @@ async function updateUserEmailService(payload) {
 
     checkRuntimeLatency(processStart, hinter);
     return true;
-
-  } catch (err) {
-    logger.error(`${hinter} RUNTIME ERROR ${err.stack}`);
-    throw new InternalServerError("Terjadi kesalahan saat memperbarui email");
-  }
 }
 
 async function updateUserPasswordService(payload) {
@@ -158,7 +145,6 @@ async function updateUserPasswordService(payload) {
   const hinter = "[UPDATE USER PASSWORD]";
   logger.debug(`${hinter} PAYLOAD: ${JSON.stringify(payload,null,2)}`);
 
-  try {
 		const { password, user_id } = payload
     let hashed;
 
@@ -186,11 +172,6 @@ async function updateUserPasswordService(payload) {
 
     checkRuntimeLatency(processStart, hinter);
     return true;
-
-  } catch (err) {
-    logger.error(`${hinter} RUNTIME ERROR ${err.stack}`);
-    throw new InternalServerError("Terjadi kesalahan saat memperbarui password");
-  }
 }
 
 async function updateUserRoleService(payload) {
@@ -198,7 +179,6 @@ async function updateUserRoleService(payload) {
   const hinter = "[UPDATE USER ROLE]";
   logger.debug(`${hinter} PAYLOAD: ${JSON.stringify(payload,null,2)}`);
 
-  try {
 		const { role, user_id } = payload;
     let isUpdated;
 
@@ -218,11 +198,6 @@ async function updateUserRoleService(payload) {
 
     checkRuntimeLatency(processStart, hinter);
     return true;
-
-  } catch (err) {
-    logger.error(`${hinter} RUNTIME ERROR ${err.stack}`);
-    throw new InternalServerError("Terjadi kesalahan saat memperbarui role");
-  }
 }
 
 async function updateUserProfilePictureService(payload) {
@@ -230,7 +205,6 @@ async function updateUserProfilePictureService(payload) {
   const hinter = "[UPDATE USER PROFILE PICTURE]";
   logger.debug(`${hinter} PAYLOAD: ${JSON.stringify(payload,null,2)}`);
 
-  try {
 		const { profile_picture, user_id } = payload
     let isUpdated;
     try {
@@ -249,11 +223,6 @@ async function updateUserProfilePictureService(payload) {
 
     checkRuntimeLatency(processStart, hinter);
     return true;
-
-  } catch (err) {
-    logger.error(`${hinter} RUNTIME ERROR ${err.stack}`);
-    throw new InternalServerError("Terjadi kesalahan saat memperbarui profile picture");
-  }
 }
 
 async function deleteUserService(payload) {
@@ -261,7 +230,6 @@ async function deleteUserService(payload) {
   const hinter = "[DELETE USER]";
   logger.debug(`${hinter} PAYLOAD: ${JSON.stringify(payload,null,2)}`);
 
-  try {
 		const { user_id } = payload
     let isDeleted;
 
@@ -281,11 +249,6 @@ async function deleteUserService(payload) {
 
     checkRuntimeLatency(processStart, hinter);
     return true;
-
-  } catch (err) {
-    logger.error(`${hinter} RUNTIME ERROR ${err.stack}`);
-    throw new InternalServerError("Terjadi kesalahan saat menghapus pengguna");
-  }
 }
 
 module.exports = {

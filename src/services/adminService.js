@@ -1,4 +1,5 @@
 const logger = require("../utils/logger");
+const redis = require("../boot/redisClient")
 const { performance } = require("perf_hooks");
 const { checkDbLatency, checkRuntimeLatency } = require("../utils/checkLatency");
 const {
@@ -21,7 +22,15 @@ async function getAllStatsService() {
   const processStart = performance.now();
   const hinter = "[GET ALL STATS]";
 
-  try {
+		let redisStatus = true;
+		try {
+			const cached = await redis().get(`allstats`)
+  	  if(cached) { checkRuntimeLatency(performance.now(),hinter); return JSON.parse(cached); }
+		} catch(err){
+			redisStatus = false;
+      logger.error(`${hinter} - REDIS SERVER ERROR - ${err.stack}`)
+		}
+
     let rows, rows1, rows3;
 
     try {
@@ -61,9 +70,7 @@ async function getAllStatsService() {
       throw new InternalServerError("Terjadi kesalahan saat mengambil data statistik dari database");
     }
 
-    checkRuntimeLatency(processStart, hinter);
-
-    return {
+    const stats = {
       user: rows ? {
         total_user: rows.total_user,
         total_admin: rows.total_admin,
@@ -87,19 +94,26 @@ async function getAllStatsService() {
         total_automotive_product: rows1.total_automotive_product,
         total_accessory_product: rows1.total_accessory_product,
         total_other_product: rows1.total_other_product,
-      } : null,
-    };
-  } catch (err) {
-    logger.error(`${hinter} RUNTIME ERROR ${err.stack}`);
-    throw new InternalServerError("Terjadi kesalahan saat memproses statistik");
-  }
+      } : null
+    }
+		if(redisStatus) await redis().set(`allstats`, JSON.stringify(stats), "EX", 3600);
+		checkRuntimeLatency(processStart, hinter);
+		return stats;
 }
 
 async function getUserStatsService() {
   const processStart = performance.now();
   const hinter = "[GET USER STATS]";
 
-  try {
+		let redisStatus = true;
+		try {
+			const cached = await redis().get(`userstats`);
+  	  if(cached) { checkRuntimeLatency(performance.now(),hinter); return JSON.parse(cached); }
+		} catch(err){
+			redisStatus = false;
+			logger.error(`${hinter} - REDIS SERVER ERROR - ${err.stack}`);
+		}
+
     let rows;
 
     try {
@@ -116,19 +130,24 @@ async function getUserStatsService() {
       throw new NotFoundError("Gagal mengambil stats users");
     }
 
+		if(redisStatus) await redis().set(`userstats`, JSON.stringify(rows), "EX", 3600);
     checkRuntimeLatency(processStart, hinter);
     return rows;
-  } catch (err) {
-    logger.error(`${hinter} RUNTIME ERROR ${err.stack}`);
-    throw new InternalServerError("Terjadi kesalahan saat mengambil stats users");
-  }
 }
 
 async function getOrderStatsService() {
   const processStart = performance.now();
   const hinter = "[GET ORDER STATS]";
 
-  try {
+		let redisStatus = true;
+		try {
+			const cached = await redis().get(`orderstats`);
+  	  if(cached) { checkRuntimeLatency(performance.now(),hinter); return JSON.parse(cached); }
+		} catch(err){
+			redisStatus = false;
+			logger.error(`${hinter} - REDIS SERVER ERROR - ${err.stack}`);
+		}
+
     let rows;
 
     try {
@@ -145,19 +164,24 @@ async function getOrderStatsService() {
       throw new NotFoundError("Gagal mengambil data stats orders");
     }
 
+		if(redisStatus) await redis().set(`orderstats`, JSON.stringify(rows), "EX", 3600);
     checkRuntimeLatency(processStart, hinter);
     return rows;
-  } catch (err) {
-    logger.error(`${hinter} RUNTIME ERROR ${err.stack}`);
-    throw new InternalServerError("Terjadi kesalahan saat mengambil data stats orders");
-  }
 }
 
 async function getProductStatsService() {
   const processStart = performance.now();
   const hinter = "[GET PRODUCT STATS]";
 
-  try {
+		let redisStatus = true;
+		try {
+			const cached = await redis().get(`productstats`)
+  	  if(cached) { checkRuntimeLatency(performance.now(),hinter); return JSON.parse(cached); }
+		} catch(err) {
+			redisStatus = false;
+			logger.error(`${hinter} - REDIS SERVER ERROR - ${err.stack}`);
+		}
+
     let rows;
 
     try {
@@ -165,21 +189,18 @@ async function getProductStatsService() {
       [rows] = await getProductStats();
       checkDbLatency(dbStart, 400, hinter);
     } catch (err) {
-      logger.error(`${hinter} DB ERROR ${err.stack}`);
+      logger.error(`${hinter} - DATABASE ERROR - ${err.stack}`);
       throw new InternalServerError("Terjadi kesalahan saat mengambil data stats products");
     }
 
     if (!rows.length) {
-      logger.warn(`${hinter} STATS PRODUCTS NOT FOUND`);
+      logger.warn(`${hinter} - STATS PRODUCTS NOT FOUND`);
       throw new NotFoundError("Gagal mengambil data stats products");
     }
 
+		if(redisStatus) await redis().set(`productstats`, JSON.stringify(rows), "EX", 3600)
     checkRuntimeLatency(processStart, hinter);
     return rows;
-  } catch (err) {
-    logger.error(`${hinter} RUNTIME ERROR ${err.stack}`);
-    throw new InternalServerError("Terjadi kesalahan saat mengambil data stats product");
-  }
 }
 
 module.exports = {

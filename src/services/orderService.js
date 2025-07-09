@@ -39,9 +39,10 @@ async function getOrderService(payload) {
   const hinter = "[GET ORDER]";
   logger.debug(`${hinter} PAYLOAD: ${JSON.stringify(payload,null,2)}`)
 
-  try {
 		const { order_id } = payload
     let rows;
+		const cached = await redis().get(`order:${order_id}`)
+    if(cached) { checkRuntimeLatency(performance.now(),hinter); return JSON.parse(cached); }
 
     try {
       const dbStart = performance.now();
@@ -57,13 +58,9 @@ async function getOrderService(payload) {
       throw new NotFoundError("Pesanan tidak ditemukan");
     }
 
+		await redis().set(`order:${order_id}`, JSON.stringify(rows), "EX", 3600)
     checkRuntimeLatency(processStart, hinter);
     return rows;
-
-  } catch (err) {
-    logger.error(`${hinter} RUNTIME ERROR ${err.stack}`);
-    throw new InternalServerError("Terjadi kesalahan saat mengambil data pesanan");
-  }
 }
 
 async function addOrderService(payload) {
@@ -72,7 +69,6 @@ async function addOrderService(payload) {
   const hinter = "[ADD ORDER]";
   logger.debug(`${hinter} PAYLOAD: ${JSON.stringify(payload,null,2)}`)
 
-  try {
   const { user_id, order_status, order_items } = payload
   let order_total_price = 0;
 
@@ -141,11 +137,6 @@ async function addOrderService(payload) {
 
     checkRuntimeLatency(processStart, hinter);
     return true;
-
-  } catch (err) {
-    logger.error(`${hinter} RUNTIME ERROR ${err.stack}`);
-    throw new InternalServerError("Terjadi kesalahan saat menambahkan pesanan");
-  }
 }
 
 async function updateOrderStatusService(payload) {
@@ -153,7 +144,6 @@ async function updateOrderStatusService(payload) {
   const hinter = "[UPDATE ORDER STATUS]";
   logger.debug(`${hinter} PAYLOAD: ${JSON.stringify(payload,null,2)}`)
 
-  try {
     const { order_id, order_status } = payload
     let isUpdated;
 
@@ -173,11 +163,6 @@ async function updateOrderStatusService(payload) {
 
     checkRuntimeLatency(processStart, hinter);
     return true;
-
-  } catch (err) {
-    logger.error(`${hinter} RUNTIME ERROR ${err.stack}`);
-    throw new InternalServerError("Terjadi kesalahan saat mengupdate status pesanan");
-  }
 }
 
 async function updateOrderTotalPriceService(payload) {
@@ -185,7 +170,6 @@ async function updateOrderTotalPriceService(payload) {
   const hinter = "[UPDATE ORDER TOTAL PRICE]";
   logger.debug(`${hinter} PAYLOAD: ${JSON.stringify(payload,null,2)}`)
 
-  try {
 		const { order_id, order_total_price } = payload
     let isUpdated;
 
@@ -205,11 +189,6 @@ async function updateOrderTotalPriceService(payload) {
 
     checkRuntimeLatency(processStart, hinter);
     return true;
-
-  } catch (err) {
-    logger.error(`${hinter} RUNTIME ERROR ${err.stack}`);
-    throw new InternalServerError("Terjadi kesalahan saat mengupdate total harga pesanan");
-  }
 }
 
 async function deleteOrderService(payload) {
@@ -217,7 +196,6 @@ async function deleteOrderService(payload) {
   const hinter = "[DELETE ORDER]";
   logger.debug(`${hinter} PAYLOAD: ${JSON.stringify(payload,null,2)}`)
 
-  try {
     const { user_id, order_id } = payload
     let isDeleted;
 
@@ -237,11 +215,6 @@ async function deleteOrderService(payload) {
 
     checkRuntimeLatency(processStart, hinter);
     return true;
-
-  } catch (err) {
-    logger.error(`${hinter} RUNTIME ERROR ${err.stack}`);
-    throw new InternalServerError("Terjadi kesalahan saat menghapus pesanan ");
-  }
 }
 
 module.exports = {
